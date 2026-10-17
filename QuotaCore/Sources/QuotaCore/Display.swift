@@ -64,6 +64,11 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
         return snapshot.rows.map { ProviderTile(row: $0, at: date) }
     }
 
+    /// The medium row has room for three rings, so the agy Claude/GPT tile is left out of it.
+    public static func withoutAgyClaudeGPT(_ tiles: [ProviderTile]) -> [ProviderTile] {
+        tiles.filter { $0.mark != .agy }
+    }
+
     static func mark(provider: String, scope: String) -> ProviderMark {
         switch (provider, scope) {
         case ("claude", _): return .claude

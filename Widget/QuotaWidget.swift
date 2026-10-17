@@ -36,7 +36,7 @@ struct QuotaTimeline: TimelineProvider {
     }
 }
 
-/// Orbit ring layouts: small cycles one provider per tap, medium and extra large show a row, large a 2x2 grid.
+/// Orbit ring layouts: small cycles one provider per tap, medium shows a three-provider row, large a 2x2 grid.
 struct QuotaWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: QuotaEntry
@@ -46,7 +46,6 @@ struct QuotaWidgetView: View {
             switch family {
             case .systemSmall: OrbitSmallView(entry: entry)
             case .systemLarge: OrbitLargeView(entry: entry)
-            case .systemExtraLarge: OrbitExtraLargeView(entry: entry)
             default: OrbitMediumView(entry: entry)
             }
         }

@@ -26,6 +26,15 @@ final class DisplayTests: XCTestCase {
         XCTAssertTrue(tiles.allSatisfy { $0.availability == .measured && !$0.isStale })
     }
 
+    func testMediumRowDropsAgyClaudeGPT() throws {
+        let snapshot = try snapshot()
+        let tiles = ProviderTile.tiles(for: snapshot, at: snapshot.generatedAt)
+        XCTAssertEqual(ProviderTile.withoutAgyClaudeGPT(tiles).map(\.name), ["Claude", "Codex", "agy Gemini"])
+        let placeholders = ProviderTile.withoutAgyClaudeGPT(ProviderTile.tiles(for: nil, at: .now))
+        XCTAssertEqual(placeholders.map(\.mark), [.claude, .codex, .gemini])
+        XCTAssertEqual(tiles.count, 4, "the filter must not change what the other layouts receive")
+    }
+
     func testStaleAuthorizationAndMissingSnapshotStates() throws {
         let snapshot = try snapshot()
         let late = snapshot.generatedAt.addingTimeInterval(Snapshot.staleInterval + 1)

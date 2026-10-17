@@ -219,14 +219,26 @@ extension OrbitSmallView {
     }
 }
 
-/// Shrinks its content to fit the space it is offered; never scales it up.
+/// Pads a layout by the system content margins, never less than 12 pt, so it stays inside the widget's real content area.
+struct ContentMargins: ViewModifier {
+    @Environment(\.widgetContentMargins) private var margins
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.leading, max(margins.leading, 12)).padding(.trailing, max(margins.trailing, 12))
+            .padding(.top, max(margins.top, 12)).padding(.bottom, max(margins.bottom, 12))
+    }
+}
+
+/// Fits its content to the space it is offered: shrinks when short of room and grows by at most `maxScale`.
 struct FitToSpace<Content: View>: View {
     let design: CGSize
+    var maxScale: CGFloat = 1
     @ViewBuilder let content: Content
 
     var body: some View {
         GeometryReader { proxy in
-            let scale = min(1, proxy.size.width / design.width, proxy.size.height / design.height)
+            let scale = min(maxScale, proxy.size.width / design.width, proxy.size.height / design.height)
             content
                 .frame(width: design.width, height: design.height)
                 .scaleEffect(scale)
@@ -235,42 +247,49 @@ struct FitToSpace<Content: View>: View {
     }
 }
 
-/// The four-provider ring row. Medium and extra large share the content sizes (ring 82, 11 pt weekly text);
-/// only the room around them differs, and the row shrinks to stay inside the widget's content margins.
+/// The medium ring row: Claude, Codex, and agy Gemini (no agy Claude/GPT), fitted to the content margins.
 struct OrbitRowView: View {
     struct Layout {
         let tileWidth: CGFloat
         let spacing: CGFloat
         let gap: CGFloat
-        let barWidth: CGFloat?
+        let ring: CGFloat
+        let number: CGFloat
+        let logo: CGFloat
+        let name: CGFloat
+        let barWidth: CGFloat
+        let weekly: OrbitWeeklyBar.Metrics
         let height: CGFloat
+        let maxScale: CGFloat
 
-        var design: CGSize { CGSize(width: tileWidth * 4 + spacing * 3, height: height) }
+        func design(count: Int) -> CGSize {
+            CGSize(width: tileWidth * CGFloat(count) + spacing * CGFloat(max(count - 1, 0)), height: height)
+        }
 
-        static let medium = Layout(tileWidth: 84, spacing: 6, gap: 2, barWidth: nil, height: 142)
-        static let extraLarge = Layout(tileWidth: 150, spacing: 24, gap: 14, barWidth: 112, height: 190)
+        static let medium = Layout(tileWidth: 112, spacing: 10, gap: 1, ring: 96, number: 24,
+                                   logo: 15, name: 10.5, barWidth: 104,
+                                   weekly: .init(text: 12, spacing: 2, barHeight: 5.5, segmentGap: 1.5), height: 148, maxScale: 1.2)
     }
 
-    @Environment(\.widgetContentMargins) private var margins
     let entry: QuotaEntry
     let layout: Layout
 
     var body: some View {
-        FitToSpace(design: layout.design) {
+        let tiles = ProviderTile.withoutAgyClaudeGPT(entry.tiles)
+        FitToSpace(design: layout.design(count: tiles.count), maxScale: layout.maxScale) {
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: layout.spacing) {
-                    ForEach(entry.tiles) { tile in
+                    ForEach(tiles) { tile in
                         VStack(spacing: 0) {
                             HStack(spacing: 3) {
-                                ProviderLogo(mark: tile.mark, size: 14)
-                                Text(tile.name).font(.system(size: 9, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
-                                StaleMark(tile: tile, size: 8)
+                                ProviderLogo(mark: tile.mark, size: layout.logo)
+                                Text(tile.name).font(.system(size: layout.name, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                                StaleMark(tile: tile, size: layout.name - 1)
                             }
                             Spacer(minLength: layout.gap)
-                            OrbitRing(tile: tile, size: 82, numberSize: 20)
+                            OrbitRing(tile: tile, size: layout.ring, numberSize: layout.number)
                             Spacer(minLength: layout.gap)
-                            OrbitWeeklyBar(tile: tile, entry: entry,
-                                           metrics: .init(text: 11, spacing: 3, barHeight: 5, segmentGap: 1.5))
+                            OrbitWeeklyBar(tile: tile, entry: entry, metrics: layout.weekly)
                                 .frame(width: layout.barWidth)
                         }.frame(width: layout.tileWidth)
                     }
@@ -278,8 +297,7 @@ struct OrbitRowView: View {
                 OrbitFooter(entry: entry).padding(.top, 4)
             }
         }
-        .padding(.leading, max(margins.leading, 12)).padding(.trailing, max(margins.trailing, 12))
-        .padding(.top, max(margins.top, 12)).padding(.bottom, max(margins.bottom, 12))
+        .modifier(ContentMargins())
         .foregroundStyle(OrbitTheme.text)
     }
 }
@@ -289,37 +307,38 @@ struct OrbitMediumView: View {
     var body: some View { OrbitRowView(entry: entry, layout: .medium) }
 }
 
-struct OrbitExtraLargeView: View {
-    let entry: QuotaEntry
-    var body: some View { OrbitRowView(entry: entry, layout: .extraLarge) }
-}
-
+/// The 2x2 grid is designed at its natural size and fitted to the content margins, so the four rings, percentages
+/// and weekly segments are as large as the widget allows and nothing is clipped.
 struct OrbitLargeView: View {
+    private static let design = CGSize(width: 300, height: 346)
     let entry: QuotaEntry
 
     var body: some View {
-        VStack(spacing: 0) {
-            Grid(horizontalSpacing: 20, verticalSpacing: 10) {
-                ForEach(0..<2, id: \.self) { row in
-                    GridRow {
-                        ForEach(entry.tiles.dropFirst(row * 2).prefix(2)) { tile in
-                            VStack(spacing: 8) {
-                                HStack(spacing: 6) {
-                                    ProviderLogo(mark: tile.mark, size: 18)
-                                    Text(tile.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
-                                    StaleMark(tile: tile, size: 10)
-                                }
-                                OrbitRing(tile: tile, size: 96, numberSize: 29)
-                                OrbitWeeklyBar(tile: tile, entry: entry,
-                                               metrics: .init(text: 11, spacing: 4, barHeight: 6, segmentGap: 2))
-                                    .frame(width: 136)
-                            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        FitToSpace(design: Self.design, maxScale: 1.15) {
+            VStack(spacing: 0) {
+                Grid(horizontalSpacing: 20, verticalSpacing: 8) {
+                    ForEach(0..<2, id: \.self) { row in
+                        GridRow {
+                            ForEach(entry.tiles.dropFirst(row * 2).prefix(2)) { tile in
+                                VStack(spacing: 7) {
+                                    HStack(spacing: 6) {
+                                        ProviderLogo(mark: tile.mark, size: 18)
+                                        Text(tile.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+                                        StaleMark(tile: tile, size: 10)
+                                    }
+                                    OrbitRing(tile: tile, size: 96, numberSize: 30)
+                                    OrbitWeeklyBar(tile: tile, entry: entry,
+                                                   metrics: .init(text: 12, spacing: 4, barHeight: 6, segmentGap: 2))
+                                        .frame(width: 136)
+                                }.frame(width: 140)
+                            }
                         }
                     }
                 }
+                OrbitFooter(entry: entry).padding(.top, 4)
             }
-            OrbitFooter(entry: entry).padding(.top, 4)
         }
-        .padding(.horizontal, 20).padding(.vertical, 18).foregroundStyle(OrbitTheme.text)
+        .modifier(ContentMargins())
+        .foregroundStyle(OrbitTheme.text)
     }
 }
