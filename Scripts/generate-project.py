@@ -44,11 +44,13 @@ for path in ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/Snap
              'QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift']:
     sources[path] = add(path, 'PBXFileReference', lastKnownFileType='sourcecode.swift', path=path, sourceTree='<group>')
 fixture = add('Fixtures', 'PBXFileReference', lastKnownFileType='folder', path='QuotaCore/Tests/QuotaCoreTests/Fixtures', sourceTree='<group>')
+assets = add('Assets', 'PBXFileReference', lastKnownFileType='folder.assetcatalog', path='App/Assets.xcassets', sourceTree='<group>')
 package = add('Package', 'XCLocalSwiftPackageReference', relativePath='QuotaCore')
 
 for name, product, kind, files, extra in [
-    ('AIQuotaWidget', 'AIQuotaWidget.app', 'application', ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'],
-     dict(INFOPLIST_FILE='Config/App-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget', ENABLE_APP_SANDBOX='NO')),
+    ('AIQuotaWidget', 'Arcmeter.app', 'application', ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'],
+     dict(INFOPLIST_FILE='Config/App-Info.plist', PRODUCT_NAME='Arcmeter', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget',
+          ENABLE_APP_SANDBOX='NO', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon')),
     ('QuotaWidgetExtension', 'QuotaWidgetExtension.appex', 'app-extension', WIDGET_FILES + ['Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/Widget-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.widget',
           CODE_SIGN_ENTITLEMENTS='Config/Widget.entitlements', ENABLE_APP_SANDBOX='YES',
@@ -65,6 +67,7 @@ for name, product, kind, files, extra in [
     framework_phase = add(name+'Frameworks', 'PBXFrameworksBuildPhase', buildActionMask='2147483647',
                           files=[add(name+'CoreLink', 'PBXBuildFile', productRef=dep)], runOnlyForDeploymentPostprocessing='0')
     resources = [add(name+'Fixture', 'PBXBuildFile', fileRef=fixture)] if name == 'QuotaCoreTests' else []
+    if name == 'AIQuotaWidget': resources = [add(name+'Assets', 'PBXBuildFile', fileRef=assets)]
     resource_phase = add(name+'Resources', 'PBXResourcesBuildPhase', buildActionMask='2147483647', files=resources, runOnlyForDeploymentPostprocessing='0')
     phases = [source_phase, framework_phase, resource_phase]
     dependencies = []
@@ -82,7 +85,7 @@ for name, product, kind, files, extra in [
         productReference=product_ref, productType='com.apple.product-type.'+kind)
 
 product_group = add('Products', 'PBXGroup', children=products, name='Products', sourceTree='<group>')
-main_group = add('MainGroup', 'PBXGroup', children=list(sources.values())+[fixture, product_group], sourceTree='<group>')
+main_group = add('MainGroup', 'PBXGroup', children=list(sources.values())+[fixture, assets, product_group], sourceTree='<group>')
 project_config = configs('Project', dict(MACOSX_DEPLOYMENT_TARGET='15.0', SDKROOT='macosx', SWIFT_VERSION='6.0',
     CLANG_ENABLE_MODULES='YES', SWIFT_STRICT_CONCURRENCY='complete', ENABLE_HARDENED_RUNTIME='NO',
     COPY_PHASE_STRIP='NO', CURRENT_PROJECT_VERSION='1', MARKETING_VERSION='1.0', SUPPORTED_PLATFORMS='macosx'))
@@ -99,7 +102,7 @@ tests = ident('QuotaCoreTestsTarget')
 <Scheme LastUpgradeVersion="2630" version="1.3">
   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
     <BuildActionEntries><BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
-      <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{app}" BuildableName="AIQuotaWidget.app" BlueprintName="AIQuotaWidget" ReferencedContainer="container:AIQuotaWidget.xcodeproj"/>
+      <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{app}" BuildableName="Arcmeter.app" BlueprintName="AIQuotaWidget" ReferencedContainer="container:AIQuotaWidget.xcodeproj"/>
     </BuildActionEntry></BuildActionEntries>
   </BuildAction>
   <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES">
@@ -108,7 +111,7 @@ tests = ident('QuotaCoreTestsTarget')
     </TestableReference></Testables>
   </TestAction>
   <LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" debugServiceExtension="internal" allowLocationSimulation="YES">
-    <BuildableProductRunnable runnableDebuggingMode="0"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{app}" BuildableName="AIQuotaWidget.app" BlueprintName="AIQuotaWidget" ReferencedContainer="container:AIQuotaWidget.xcodeproj"/></BuildableProductRunnable>
+    <BuildableProductRunnable runnableDebuggingMode="0"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{app}" BuildableName="Arcmeter.app" BlueprintName="AIQuotaWidget" ReferencedContainer="container:AIQuotaWidget.xcodeproj"/></BuildableProductRunnable>
   </LaunchAction>
   <ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES"/>
   <AnalyzeAction buildConfiguration="Debug"/>

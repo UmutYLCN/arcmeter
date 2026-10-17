@@ -1,6 +1,6 @@
 # Arcmeter
 
-A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`), in the **Orbit** design on a glossy black background. The Xcode project, scheme, and `AIQuotaWidget.app` bundle keep their original file names so the installed widget registration and shared snapshot keep working; the user-visible name is Arcmeter. The 5-hour window is the primary reading, drawn as a ring (half-circle on the small tile) with the remaining percentage inside; the weekly window sits below as `7d 33%` over ten thin segments, with its reset countdown. Rings, the half-circle, and weekly segments are white on a dim track; each indicator turns orange when its remaining quota drops below 20% and red below 10%, independently for the 5-hour and weekly windows. A `*` marks a limiting window that is running low (50% or less).
+A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`), in the **Orbit** design on a glossy black background. The Xcode project and scheme keep their original file names; the built app bundle is `Arcmeter.app`. Bundle identifiers, widget kinds, and the shared snapshot path keep their original values so the installed widget registration and data keep working. The 5-hour window is the primary reading, drawn as a ring (half-circle on the small tile) with the remaining percentage inside; the weekly window sits below as `7d 33%` over ten thin segments, with its reset countdown. Rings, the half-circle, and weekly segments are white on a dim track; each indicator turns orange when its remaining quota drops below 20% and red below 10%, independently for the 5-hour and weekly windows. A `*` marks a limiting window that is running low (50% or less).
 
 - **Small:** one provider per tile. Tap `›` to advance Claude, Codex, agy Gemini, agy Claude/GPT. WidgetKit has no swipe, so this is an interactive AppIntent button (macOS 14+); the current index is kept in the widget extension's own preferences.
 - **Medium:** Claude, Codex, and agy Gemini in a row, each with a 5h ring (agy Claude/GPT is not shown here); the row is fitted to the system content margins.
@@ -24,12 +24,14 @@ xcodebuild -project AIQuotaWidget.xcodeproj -scheme AIQuotaWidget \
 
 The shared app scheme builds and embeds the widget extension and runs the QuotaCore unit tests. The decoder is a small local Swift package in `QuotaCore/`; its tests also run with `swift test --package-path QuotaCore`. The fixture was captured from a real `quota-axi --json --allow-keychain-prompt` read on October 17, 2026. It contains only the three supported providers and has account keys removed.
 
-Open `AIQuotaWidget.xcodeproj` in Xcode to edit or run. The checked-in project can be regenerated with `python3 Scripts/generate-project.py`, using only the Python standard library.
+Open `AIQuotaWidget.xcodeproj` in Xcode to edit or run. The checked-in project can be regenerated with `python3 Scripts/generate-project.py`, using only the Python standard library. The built host app is `DerivedData/Build/Products/Debug/Arcmeter.app`.
+
+The app icon is the L9 mark in `Design/AppIcon/L9.png`, placed on a macOS icon-grid squircle. `Scripts/generate-app-icon.sh` regenerates the sizes in `App/Assets.xcassets/AppIcon.appiconset` (it uses the Swift compiler and `sips`).
 
 ## Run and add to the desktop
 
 ```sh
-open DerivedData/Build/Products/Debug/AIQuotaWidget.app
+open DerivedData/Build/Products/Debug/Arcmeter.app
 ```
 
 1. Let the first refresh finish. All four quota rows should appear in the host app.

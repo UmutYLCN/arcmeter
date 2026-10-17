@@ -2,7 +2,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 if [ ! -r "$HOME/Library/Application Support/AIQuotaWidget/snapshot.json" ]; then
-  echo "Launch AIQuotaWidget.app and wait for its first successful refresh before running this check." >&2
+  echo "Launch Arcmeter.app and wait for its first successful refresh before running this check." >&2
   exit 1
 fi
 python3 - <<'CHECK'
