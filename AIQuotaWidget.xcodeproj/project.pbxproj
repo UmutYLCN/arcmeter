@@ -1,0 +1,566 @@
+// !$*UTF8*$!
+{
+	archiveVersion = "1";
+	classes = {
+	};
+	objectVersion = "60";
+	objects = {
+		8AAD4AC36156FCB8DA5E468F = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "App/AIQuotaWidgetApp.swift";
+			sourceTree = "<group>";
+		};
+		5786CD6E4B2E7FC40D3D9698 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "App/QuotaReader.swift";
+			sourceTree = "<group>";
+		};
+		78CC7F1C8D4836FE56CE13F3 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Shared/SnapshotStore.swift";
+			sourceTree = "<group>";
+		};
+		AF45EE62C1F6527E566D3348 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/QuotaWidget.swift";
+			sourceTree = "<group>";
+		};
+		25AB79D2F798D2A5AFF47FA0 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/AIQuotaWidget.swift";
+			sourceTree = "<group>";
+		};
+		FA0656FB53880C42D350790D = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift";
+			sourceTree = "<group>";
+		};
+		6FC1F09BE441258BA67129D1 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "folder";
+			path = "QuotaCore/Tests/QuotaCoreTests/Fixtures";
+			sourceTree = "<group>";
+		};
+		59DE121DB1B8145E4C974543 = {
+			isa = "XCLocalSwiftPackageReference";
+			relativePath = "QuotaCore";
+		};
+		D3C08D1675966E47F22E66D0 = {
+			isa = "PBXFileReference";
+			explicitFileType = "wrapper.application";
+			path = "AIQuotaWidget.app";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		D4771DD2AD2C2D0A038754C2 = {
+			isa = "PBXBuildFile";
+			fileRef = 8AAD4AC36156FCB8DA5E468F;
+		};
+		FC2AB9D1B9F0DB0CE95C1C4C = {
+			isa = "PBXBuildFile";
+			fileRef = 5786CD6E4B2E7FC40D3D9698;
+		};
+		8C13EB45465C0DD00C7B3144 = {
+			isa = "PBXBuildFile";
+			fileRef = 78CC7F1C8D4836FE56CE13F3;
+		};
+		27C05D586A1125B680248192 = {
+			isa = "PBXSourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				D4771DD2AD2C2D0A038754C2,
+				FC2AB9D1B9F0DB0CE95C1C4C,
+				8C13EB45465C0DD00C7B3144,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		19C9293FA4793222C5FBE473 = {
+			isa = "XCSwiftPackageProductDependency";
+			package = 59DE121DB1B8145E4C974543;
+			productName = "QuotaCore";
+		};
+		218984094A791756107ED1DB = {
+			isa = "PBXBuildFile";
+			productRef = 19C9293FA4793222C5FBE473;
+		};
+		F9DFB9E2EAEA9DE03E74741F = {
+			isa = "PBXFrameworksBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				218984094A791756107ED1DB,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		6C253FFAB572448E5529127E = {
+			isa = "PBXResourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		23F2BC07A75D3A635DFE41DD = {
+			isa = "PBXBuildFile";
+			fileRef = A3337A30D39351F3431320A0;
+			settings = {
+				ATTRIBUTES = (
+					"RemoveHeadersOnCopy",
+				);
+			};
+		};
+		6D1D40D9616D7E90F1E634C7 = {
+			isa = "PBXCopyFilesBuildPhase";
+			buildActionMask = "2147483647";
+			dstPath = "";
+			dstSubfolderSpec = "13";
+			files = (
+				23F2BC07A75D3A635DFE41DD,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		6D1DE3AB287622A07B902120 = {
+			isa = "PBXContainerItemProxy";
+			containerPortal = 985959785319747668373CC6;
+			proxyType = "1";
+			remoteGlobalIDString = 997089F1AA31E7AD93E3CA74;
+			remoteInfo = "QuotaWidgetExtension";
+		};
+		5F2AABE8DFB1638A4A4E9731 = {
+			isa = "PBXTargetDependency";
+			target = 997089F1AA31E7AD93E3CA74;
+			targetProxy = 6D1DE3AB287622A07B902120;
+		};
+		D793E5D2127B4E5F9AFA89E6 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = "YES";
+				CODE_SIGN_STYLE = "Manual";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGNING_ALLOWED = "YES";
+				COMBINE_HIDPI_IMAGES = "YES";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				INFOPLIST_FILE = "Config/App-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "local.ai-quota-widget";
+				ENABLE_APP_SANDBOX = "NO";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				ENABLE_TESTABILITY = "YES";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ONLY_ACTIVE_ARCH = "YES";
+			};
+			name = "Debug";
+		};
+		1417A789797960D9A17A8C32 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = "YES";
+				CODE_SIGN_STYLE = "Manual";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGNING_ALLOWED = "YES";
+				COMBINE_HIDPI_IMAGES = "YES";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				INFOPLIST_FILE = "Config/App-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "local.ai-quota-widget";
+				ENABLE_APP_SANDBOX = "NO";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = "Release";
+		};
+		D4952741B49BDF688CE545F9 = {
+			isa = "XCConfigurationList";
+			buildConfigurations = (
+				D793E5D2127B4E5F9AFA89E6,
+				1417A789797960D9A17A8C32,
+			);
+			defaultConfigurationIsVisible = "0";
+			defaultConfigurationName = "Release";
+		};
+		8560482289AC923FA7DE5346 = {
+			isa = "PBXNativeTarget";
+			buildConfigurationList = D4952741B49BDF688CE545F9;
+			buildPhases = (
+				27C05D586A1125B680248192,
+				F9DFB9E2EAEA9DE03E74741F,
+				6C253FFAB572448E5529127E,
+				6D1D40D9616D7E90F1E634C7,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5F2AABE8DFB1638A4A4E9731,
+			);
+			name = "AIQuotaWidget";
+			packageProductDependencies = (
+				19C9293FA4793222C5FBE473,
+			);
+			productName = "AIQuotaWidget";
+			productReference = D3C08D1675966E47F22E66D0;
+			productType = "com.apple.product-type.application";
+		};
+		A3337A30D39351F3431320A0 = {
+			isa = "PBXFileReference";
+			explicitFileType = "wrapper.app-extension";
+			path = "QuotaWidgetExtension.appex";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		9CDA91F6E81DDC25462D6850 = {
+			isa = "PBXBuildFile";
+			fileRef = AF45EE62C1F6527E566D3348;
+		};
+		DE8CEA4629241ABD7508444C = {
+			isa = "PBXBuildFile";
+			fileRef = 25AB79D2F798D2A5AFF47FA0;
+		};
+		BE2B2A7006DA84CFDB006103 = {
+			isa = "PBXBuildFile";
+			fileRef = 78CC7F1C8D4836FE56CE13F3;
+		};
+		070E4E523C1A22E1213DA424 = {
+			isa = "PBXSourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				9CDA91F6E81DDC25462D6850,
+				DE8CEA4629241ABD7508444C,
+				BE2B2A7006DA84CFDB006103,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		2B006939BA2861C3CDED03D1 = {
+			isa = "XCSwiftPackageProductDependency";
+			package = 59DE121DB1B8145E4C974543;
+			productName = "QuotaCore";
+		};
+		772FCB5EE86AF9995129121B = {
+			isa = "PBXBuildFile";
+			productRef = 2B006939BA2861C3CDED03D1;
+		};
+		6C61A721CD2391F13F705B9C = {
+			isa = "PBXFrameworksBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				772FCB5EE86AF9995129121B,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		E434F6243F6986FC8DCC8618 = {
+			isa = "PBXResourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		C8CC2701C5D585F2D7FBEC9F = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = "YES";
+				CODE_SIGN_STYLE = "Manual";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGNING_ALLOWED = "YES";
+				COMBINE_HIDPI_IMAGES = "YES";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				INFOPLIST_FILE = "Config/Widget-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "local.ai-quota-widget.widget";
+				CODE_SIGN_ENTITLEMENTS = "Config/Widget.entitlements";
+				ENABLE_APP_SANDBOX = "YES";
+				APPLICATION_EXTENSION_API_ONLY = "YES";
+				SKIP_INSTALL = "YES";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				ENABLE_TESTABILITY = "YES";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ONLY_ACTIVE_ARCH = "YES";
+			};
+			name = "Debug";
+		};
+		FD573EB23911DBCDD52B1BFE = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = "YES";
+				CODE_SIGN_STYLE = "Manual";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGNING_ALLOWED = "YES";
+				COMBINE_HIDPI_IMAGES = "YES";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				INFOPLIST_FILE = "Config/Widget-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "local.ai-quota-widget.widget";
+				CODE_SIGN_ENTITLEMENTS = "Config/Widget.entitlements";
+				ENABLE_APP_SANDBOX = "YES";
+				APPLICATION_EXTENSION_API_ONLY = "YES";
+				SKIP_INSTALL = "YES";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = "Release";
+		};
+		16DFE26B07E6FD301278559D = {
+			isa = "XCConfigurationList";
+			buildConfigurations = (
+				C8CC2701C5D585F2D7FBEC9F,
+				FD573EB23911DBCDD52B1BFE,
+			);
+			defaultConfigurationIsVisible = "0";
+			defaultConfigurationName = "Release";
+		};
+		997089F1AA31E7AD93E3CA74 = {
+			isa = "PBXNativeTarget";
+			buildConfigurationList = 16DFE26B07E6FD301278559D;
+			buildPhases = (
+				070E4E523C1A22E1213DA424,
+				6C61A721CD2391F13F705B9C,
+				E434F6243F6986FC8DCC8618,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "QuotaWidgetExtension";
+			packageProductDependencies = (
+				2B006939BA2861C3CDED03D1,
+			);
+			productName = "QuotaWidgetExtension";
+			productReference = A3337A30D39351F3431320A0;
+			productType = "com.apple.product-type.app-extension";
+		};
+		3CEF0CBD440D7B9BB5786CDC = {
+			isa = "PBXFileReference";
+			explicitFileType = "wrapper.cfbundle";
+			path = "QuotaCoreTests.xctest";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		8AAF0A79B81240EFE504E69E = {
+			isa = "PBXBuildFile";
+			fileRef = FA0656FB53880C42D350790D;
+		};
+		958D3F09ECF9A53A32473F3D = {
+			isa = "PBXSourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				8AAF0A79B81240EFE504E69E,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		200B9282069A1FCDB8AB38DD = {
+			isa = "XCSwiftPackageProductDependency";
+			package = 59DE121DB1B8145E4C974543;
+			productName = "QuotaCore";
+		};
+		9BAD6BA0EBACD0F76FAF549A = {
+			isa = "PBXBuildFile";
+			productRef = 200B9282069A1FCDB8AB38DD;
+		};
+		E4311D62EEF44E6ED3A13D2D = {
+			isa = "PBXFrameworksBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				9BAD6BA0EBACD0F76FAF549A,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		3AC23722F3D6611201390B33 = {
+			isa = "PBXBuildFile";
+			fileRef = 6FC1F09BE441258BA67129D1;
+		};
+		3792AE61DB3661470F116C31 = {
+			isa = "PBXResourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				3AC23722F3D6611201390B33,
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		14C5F8141A9BFBD4D10FFF22 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = "YES";
+				CODE_SIGN_STYLE = "Manual";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGNING_ALLOWED = "YES";
+				COMBINE_HIDPI_IMAGES = "YES";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "local.ai-quota-widget.tests";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				ENABLE_TESTABILITY = "YES";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ONLY_ACTIVE_ARCH = "YES";
+			};
+			name = "Debug";
+		};
+		26383962BCA51577E0173EBA = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				GENERATE_INFOPLIST_FILE = "YES";
+				CODE_SIGN_STYLE = "Manual";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGNING_ALLOWED = "YES";
+				COMBINE_HIDPI_IMAGES = "YES";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "local.ai-quota-widget.tests";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = "Release";
+		};
+		1492E9EE1B53A284D75179E6 = {
+			isa = "XCConfigurationList";
+			buildConfigurations = (
+				14C5F8141A9BFBD4D10FFF22,
+				26383962BCA51577E0173EBA,
+			);
+			defaultConfigurationIsVisible = "0";
+			defaultConfigurationName = "Release";
+		};
+		6643B83B0BDDCA98F3037E73 = {
+			isa = "PBXNativeTarget";
+			buildConfigurationList = 1492E9EE1B53A284D75179E6;
+			buildPhases = (
+				958D3F09ECF9A53A32473F3D,
+				E4311D62EEF44E6ED3A13D2D,
+				3792AE61DB3661470F116C31,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "QuotaCoreTests";
+			packageProductDependencies = (
+				200B9282069A1FCDB8AB38DD,
+			);
+			productName = "QuotaCoreTests";
+			productReference = 3CEF0CBD440D7B9BB5786CDC;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		4EDC8BFAFC6BD936B849F38C = {
+			isa = "PBXGroup";
+			children = (
+				D3C08D1675966E47F22E66D0,
+				A3337A30D39351F3431320A0,
+				3CEF0CBD440D7B9BB5786CDC,
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+		97A63A01E61FD439E8760B8E = {
+			isa = "PBXGroup";
+			children = (
+				8AAD4AC36156FCB8DA5E468F,
+				5786CD6E4B2E7FC40D3D9698,
+				78CC7F1C8D4836FE56CE13F3,
+				AF45EE62C1F6527E566D3348,
+				25AB79D2F798D2A5AFF47FA0,
+				FA0656FB53880C42D350790D,
+				6FC1F09BE441258BA67129D1,
+				4EDC8BFAFC6BD936B849F38C,
+			);
+			sourceTree = "<group>";
+		};
+		433548979C024CC63B5F3B8D = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = "15.0";
+				SDKROOT = "macosx";
+				SWIFT_VERSION = "6.0";
+				CLANG_ENABLE_MODULES = "YES";
+				SWIFT_STRICT_CONCURRENCY = "complete";
+				ENABLE_HARDENED_RUNTIME = "NO";
+				COPY_PHASE_STRIP = "NO";
+				CURRENT_PROJECT_VERSION = "1";
+				MARKETING_VERSION = "1.0";
+				SUPPORTED_PLATFORMS = "macosx";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				ENABLE_TESTABILITY = "YES";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ONLY_ACTIVE_ARCH = "YES";
+			};
+			name = "Debug";
+		};
+		B800A40FDE6F0A0218D9BCD2 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = "15.0";
+				SDKROOT = "macosx";
+				SWIFT_VERSION = "6.0";
+				CLANG_ENABLE_MODULES = "YES";
+				SWIFT_STRICT_CONCURRENCY = "complete";
+				ENABLE_HARDENED_RUNTIME = "NO";
+				COPY_PHASE_STRIP = "NO";
+				CURRENT_PROJECT_VERSION = "1";
+				MARKETING_VERSION = "1.0";
+				SUPPORTED_PLATFORMS = "macosx";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = "Release";
+		};
+		3C05BEEE7303EE3FA7B250FA = {
+			isa = "XCConfigurationList";
+			buildConfigurations = (
+				433548979C024CC63B5F3B8D,
+				B800A40FDE6F0A0218D9BCD2,
+			);
+			defaultConfigurationIsVisible = "0";
+			defaultConfigurationName = "Release";
+		};
+		985959785319747668373CC6 = {
+			isa = "PBXProject";
+			attributes = {
+				BuildIndependentTargetsInParallel = "YES";
+				LastUpgradeCheck = "2630";
+			};
+			buildConfigurationList = 3C05BEEE7303EE3FA7B250FA;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = "en";
+			hasScannedForEncodings = "0";
+			knownRegions = (
+				"en",
+				"Base",
+			);
+			mainGroup = 97A63A01E61FD439E8760B8E;
+			productRefGroup = 4EDC8BFAFC6BD936B849F38C;
+			projectDirPath = "";
+			projectRoot = "";
+			packageReferences = (
+				59DE121DB1B8145E4C974543,
+			);
+			targets = (
+				8560482289AC923FA7DE5346,
+				997089F1AA31E7AD93E3CA74,
+				6643B83B0BDDCA98F3037E73,
+			);
+		};
+	};
+	rootObject = 985959785319747668373CC6;
+}
