@@ -50,11 +50,13 @@ package = add('Package', 'XCLocalSwiftPackageReference', relativePath='QuotaCore
 for name, product, kind, files, extra in [
     ('AIQuotaWidget', 'Arcmeter.app', 'application', ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/App-Info.plist', PRODUCT_NAME='Arcmeter', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget',
-          ENABLE_APP_SANDBOX='NO', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon')),
+          ENABLE_APP_SANDBOX='NO', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon',
+          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='6')),
     ('QuotaWidgetExtension', 'QuotaWidgetExtension.appex', 'app-extension', WIDGET_FILES + ['Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/Widget-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.widget',
           CODE_SIGN_ENTITLEMENTS='Config/Widget.entitlements', ENABLE_APP_SANDBOX='YES',
-          APPLICATION_EXTENSION_API_ONLY='YES', SKIP_INSTALL='YES')),
+          APPLICATION_EXTENSION_API_ONLY='YES', SKIP_INSTALL='YES',
+          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='6')),
     ('QuotaCoreTests', 'QuotaCoreTests.xctest', 'bundle.unit-test', ['QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift'],
      dict(GENERATE_INFOPLIST_FILE='YES', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.tests')),
 ]:

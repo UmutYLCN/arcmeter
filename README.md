@@ -24,7 +24,7 @@ xcodebuild -project AIQuotaWidget.xcodeproj -scheme AIQuotaWidget \
 
 The shared app scheme builds and embeds the widget extension and runs the QuotaCore unit tests. The decoder is a small local Swift package in `QuotaCore/`; its tests also run with `swift test --package-path QuotaCore`. The fixture was captured from a real `quota-axi --json --allow-keychain-prompt` read on October 17, 2026. It contains only the three supported providers and has account keys removed.
 
-Open `AIQuotaWidget.xcodeproj` in Xcode to edit or run. The checked-in project can be regenerated with `python3 Scripts/generate-project.py`, using only the Python standard library. The built host app is `DerivedData/Build/Products/Debug/Arcmeter.app`.
+Open `AIQuotaWidget.xcodeproj` in Xcode to edit or run. The checked-in project can be regenerated with `python3 Scripts/generate-project.py`, using only the Python standard library. The built host app is `DerivedData/Build/Products/Debug/Arcmeter.app`. Every shipped UI change must bump `CURRENT_PROJECT_VERSION` for both the app and the widget extension (set in `Scripts/generate-project.py`), or the widget gallery keeps its cached descriptors.
 
 The app icon is the L9 mark in `Design/AppIcon/L9.png`, placed on a macOS icon-grid squircle. `Scripts/generate-app-icon.sh` regenerates the sizes in `App/Assets.xcassets/AppIcon.appiconset` (it uses the Swift compiler and `sips`).
 
