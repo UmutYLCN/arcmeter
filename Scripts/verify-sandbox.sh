@@ -5,6 +5,13 @@ if [ ! -r "$HOME/Library/Application Support/AIQuotaWidget/snapshot.json" ]; the
   echo "Launch AIQuotaWidget.app and wait for its first successful refresh before running this check." >&2
   exit 1
 fi
+python3 - <<'CHECK'
+import json
+from pathlib import Path
+snapshot = Path.home() / 'Library/Application Support/AIQuotaWidget/snapshot.json'
+if json.loads(snapshot.read_text())['version'] != 2:
+    raise SystemExit('Wait for the updated host to finish its first refresh with both quota windows.')
+CHECK
 probe=DerivedData/SandboxProbe.app
 mkdir -p "$probe/Contents/MacOS"
 xcrun swiftc -parse-as-library -target "$(uname -m)-apple-macos15.0" \

@@ -10,9 +10,17 @@ struct SandboxProbe {
             throw CocoaError(.fileReadNoPermission)
         }
         let providers = Set(snapshot.rows.map(\.provider))
-        guard providers == ["claude", "codex", "agy"] else { throw SnapshotError.invalidSnapshot }
+        guard snapshot.version == 2, providers == ["claude", "codex", "agy"] else {
+            throw SnapshotError.invalidSnapshot
+        }
         for row in snapshot.rows {
-            print("\(row.name): \(row.percentRemaining.map { String(Int($0)) + "%" } ?? row.status)")
+            guard Set(row.windows.map(\.period)) == Set(QuotaPeriod.allCases) else {
+                throw SnapshotError.invalidSnapshot
+            }
+            let windows = row.windows.map { window in
+                window.period.label + " " + (window.percentRemaining.map { String(Int($0)) + "%" } ?? window.status)
+            }.joined(separator: ", ")
+            print("\(row.name): \(windows)\(row.isStale(at: .now) ? " [stale]" : "")")
         }
         let descriptor = Darwin.open(SnapshotStore.url.path, O_WRONLY)
         guard descriptor < 0 else {

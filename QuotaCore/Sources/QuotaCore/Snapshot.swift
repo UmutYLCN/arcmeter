@@ -1,5 +1,20 @@
 import Foundation
 
+public enum QuotaPeriod: String, Codable, Sendable, CaseIterable {
+    case fiveHour, weekly
+
+    public var label: String { self == .fiveHour ? "5h" : "7d" }
+}
+
+public struct WindowQuota: Codable, Identifiable, Sendable, Equatable {
+    public var id: QuotaPeriod { period }
+    public let period: QuotaPeriod
+    public let percentRemaining: Double?
+    public let resetsAt: Date?
+    public let status: String
+    public let isLimiting: Bool
+}
+
 public struct QuotaRow: Codable, Identifiable, Sendable, Equatable {
     public var id: String { provider + ":" + scope }
     public let provider: String
@@ -12,6 +27,35 @@ public struct QuotaRow: Codable, Identifiable, Sendable, Equatable {
     public let projectedExhaustedAt: Date?
     public let observedAt: Date
     public let sourceStale: Bool
+    // Optional storage keeps snapshots written by the first app version readable.
+    private let windowQuotas: [WindowQuota]?
+    public let runwayStatus: String?
+    public let exhaustionResetAt: Date?
+
+    public var windows: [WindowQuota] {
+        windowQuotas ?? QuotaPeriod.allCases.map {
+            WindowQuota(period: $0, percentRemaining: nil, resetsAt: nil,
+                        status: "refresh needed", isLimiting: false)
+        }
+    }
+
+    init(provider: String, scope: String, name: String, percentRemaining: Double?, status: String,
+         limitingWindow: String?, resetsAt: Date?, projectedExhaustedAt: Date?, observedAt: Date,
+         sourceStale: Bool, windowQuotas: [WindowQuota], runwayStatus: String?, exhaustionResetAt: Date?) {
+        self.provider = provider
+        self.scope = scope
+        self.name = name
+        self.percentRemaining = percentRemaining
+        self.status = status
+        self.limitingWindow = limitingWindow
+        self.resetsAt = resetsAt
+        self.projectedExhaustedAt = projectedExhaustedAt
+        self.observedAt = observedAt
+        self.sourceStale = sourceStale
+        self.windowQuotas = windowQuotas
+        self.runwayStatus = runwayStatus
+        self.exhaustionResetAt = exhaustionResetAt
+    }
 
     public func isStale(at date: Date) -> Bool {
         sourceStale || date.timeIntervalSince(observedAt) >= Snapshot.staleInterval
@@ -19,8 +63,8 @@ public struct QuotaRow: Codable, Identifiable, Sendable, Equatable {
     }
 
     public var runsOutBeforeReset: Bool {
-        guard let projectedExhaustedAt, let resetsAt else { return false }
-        return projectedExhaustedAt < resetsAt
+        guard let projectedExhaustedAt, let reset = exhaustionResetAt ?? resetsAt else { return false }
+        return projectedExhaustedAt < reset
     }
 }
 
@@ -37,7 +81,7 @@ public struct Snapshot: Codable, Sendable, Equatable {
 
     public static func decode(_ data: Data) throws -> Snapshot {
         let snapshot = try JSONDecoder().decode(Snapshot.self, from: data)
-        guard snapshot.version == 1, !snapshot.rows.isEmpty else { throw SnapshotError.invalidSnapshot }
+        guard [1, 2].contains(snapshot.version), !snapshot.rows.isEmpty else { throw SnapshotError.invalidSnapshot }
         return snapshot
     }
 
@@ -75,14 +119,23 @@ public enum QuotaDecoder {
                 let windows = provider?.windows ?? []
                 // Duplicate IDs occur in real agy output; choose the tightest reading,
                 // then the earliest reset, rather than the first occurrence.
-                let limiting = windows.filter { availability?.limitingWindowIds?.contains($0.id) == true }
-                    .sorted {
-                        if $0.percentRemaining != $1.percentRemaining {
-                            return ($0.percentRemaining ?? 101) < ($1.percentRemaining ?? 101)
-                        }
-                        return (timestamp($0.resetsAt) ?? .distantFuture) < (timestamp($1.resetsAt) ?? .distantFuture)
-                    }
+                let limiting = sorted(windows.filter { availability?.limitingWindowIds?.contains($0.id) == true })
                 let window = limiting.first
+                let canReadWindows = provider != nil && provider?.notSetUp != true
+                    && ["fresh", "stale"].contains(state?.status ?? "")
+                let scopeWindows = windows.filter { availability?.boundedBy?.contains($0.id) == true && $0.shareOf == nil }
+                let windowQuotas = QuotaPeriod.allCases.map { period in
+                    let candidates = sorted(scopeWindows.filter { matches($0, period: period) })
+                    let chosen = candidates.first
+                    let untrusted = candidates.contains { state?.untrustedWindowIds?.contains($0.id) == true }
+                    let valid = !candidates.isEmpty && candidates.allSatisfy { validPercent($0.percentRemaining) }
+                    let measured = canReadWindows && valid && !untrusted
+                    return WindowQuota(period: period,
+                        percentRemaining: measured ? chosen?.percentRemaining : nil,
+                        resetsAt: canReadWindows ? timestamp(chosen?.resetsAt) : nil,
+                        status: measured ? "measured" : (!canReadWindows ? status : (candidates.isEmpty ? "not reported" : "unmeasurable")),
+                        isLimiting: measured && candidates.contains { availability?.limitingWindowIds?.contains($0.id) == true })
+                }
                 let runway = availability?.runway
                 let projection = ["projected_exhaustion", "exhausted_now"].contains(runway?.status ?? "")
                     ? timestamp(runway?.projectedExhaustedAt) : nil
@@ -95,10 +148,34 @@ public enum QuotaDecoder {
                     limitingWindow: window.map { label($0) }, resetsAt: timestamp(window?.resetsAt),
                     projectedExhaustedAt: status == "measured" ? projection : nil,
                     observedAt: timestamp(state?.refreshedAt) ?? generatedAt,
-                    sourceStale: state?.stale == true || state?.status == "stale"))
+                    sourceStale: state?.stale == true || state?.status == "stale",
+                    windowQuotas: windowQuotas, runwayStatus: status == "measured" ? runway?.status : nil,
+                    exhaustionResetAt: timestamp(sorted(windows.filter { $0.id == runway?.limitingWindowId }).first?.resetsAt)))
             }
         }
-        return Snapshot(version: 1, generatedAt: generatedAt, rows: rows)
+        return Snapshot(version: 2, generatedAt: generatedAt, rows: rows)
+    }
+
+    private static func validPercent(_ value: Double?) -> Bool {
+        value.map { $0.isFinite && (0...100).contains($0) } == true
+    }
+
+    private static func sorted(_ windows: [Window]) -> [Window] {
+        windows.sorted {
+            if $0.percentRemaining != $1.percentRemaining {
+                return ($0.percentRemaining ?? 101) < ($1.percentRemaining ?? 101)
+            }
+            return (timestamp($0.resetsAt) ?? .distantFuture) < (timestamp($1.resetsAt) ?? .distantFuture)
+        }
+    }
+
+    private static func matches(_ window: Window, period: QuotaPeriod) -> Bool {
+        switch period {
+        case .fiveHour:
+            return window.kind == "session" && (window.windowSeconds == 18_000
+                || window.id == "five_hour" || window.id.contains("5h"))
+        case .weekly: return window.kind == "weekly"
+        }
     }
 
     private static func label(_ window: Window) -> String {
@@ -137,18 +214,21 @@ private struct State: Decodable {
     let status: String?
     let stale: Bool?
     let refreshedAt: String?
+    let untrustedWindowIds: [String]?
 }
 private struct Semantics: Decodable { let effectiveAvailability: [Availability]? }
 private struct Availability: Decodable {
     let scope: String
     let status: String?
     let effectivePercentRemaining: Double?
+    let boundedBy: [String]?
     let limitingWindowIds: [String]?
     let runway: Runway?
 }
 private struct Runway: Decodable {
     let status: String?
     let projectedExhaustedAt: String?
+    let limitingWindowId: String?
 }
 private struct Window: Decodable {
     let id: String
@@ -156,4 +236,6 @@ private struct Window: Decodable {
     let kind: String?
     let percentRemaining: Double?
     let resetsAt: String?
+    let windowSeconds: Double?
+    let shareOf: String?
 }

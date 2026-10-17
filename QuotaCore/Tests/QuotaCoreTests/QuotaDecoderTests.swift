@@ -27,12 +27,19 @@ final class QuotaDecoderTests: XCTestCase {
         XCTAssertTrue(snapshot.rows[0].runsOutBeforeReset)
         XCTAssertNotNil(snapshot.rows[0].projectedExhaustedAt)
         XCTAssertNil(snapshot.rows[1].projectedExhaustedAt)
+        XCTAssertEqual(snapshot.rows.map { $0.windows.map(\.period) }, Array(repeating: [.fiveHour, .weekly], count: 4))
+        XCTAssertEqual(snapshot.rows.map { $0.windows.map(\.percentRemaining) }, [[96, 33], [100, 84], [100, 86], [100, 100]])
+        XCTAssertEqual(snapshot.rows[2].windows[1].resetsAt, gemini.resetsAt)
+        XCTAssertEqual(snapshot.rows[0].windows.map(\.isLimiting), [false, true])
+        XCTAssertEqual(snapshot.rows[1].runwayStatus, "through_reset")
+        XCTAssertEqual(snapshot.rows[2].runwayStatus, "unknown")
     }
 
     func testMissingProvidersStayVisibleWithoutInventedPercentages() throws {
         let snapshot = try modified { $0["providers"] = [] }
         XCTAssertEqual(snapshot.rows.count, 4)
         XCTAssertTrue(snapshot.rows.allSatisfy { $0.percentRemaining == nil && $0.status == "not reported" })
+        XCTAssertTrue(snapshot.rows.flatMap(\.windows).allSatisfy { $0.percentRemaining == nil && $0.resetsAt == nil })
     }
 
     func testAuthorizationOverridesOldQuota() throws {
@@ -44,6 +51,7 @@ final class QuotaDecoderTests: XCTestCase {
         XCTAssertEqual(snapshot.rows[0].status, "authorization needed")
         XCTAssertNil(snapshot.rows[0].percentRemaining)
         XCTAssertNil(snapshot.rows[0].projectedExhaustedAt)
+        XCTAssertTrue(snapshot.rows[0].windows.allSatisfy { $0.percentRemaining == nil && $0.resetsAt == nil })
     }
 
     func testUnmeasurableAndOutOfRangeDoNotBecomeFullOrEmpty() throws {
@@ -137,5 +145,86 @@ final class QuotaDecoderTests: XCTestCase {
         XCTAssertThrowsError(try modified { $0["generatedAt"] = "invalid" })
         XCTAssertThrowsError(try QuotaDecoder.decode(Data("{}".utf8)))
         XCTAssertThrowsError(try Snapshot.decode(Data("{}".utf8)))
+    }
+
+    func testMissingWeeklyWindowDoesNotBorrowTheSessionQuota() throws {
+        let snapshot = try modified { json in
+            var providers = json["providers"] as! [[String: Any]]
+            var windows = providers[0]["windows"] as! [[String: Any]]
+            windows.removeLast()
+            providers[0]["windows"] = windows
+            json["providers"] = providers
+        }
+        XCTAssertEqual(snapshot.rows[0].windows[0].percentRemaining, 96)
+        XCTAssertNil(snapshot.rows[0].windows[1].percentRemaining)
+        XCTAssertEqual(snapshot.rows[0].windows[1].status, "not reported")
+    }
+
+    func testExhaustionUsesItsOwnWindowResetEvenWhenAnotherWindowLimitsCurrentPercentage() throws {
+        let snapshot = try modified { json in
+            var providers = json["providers"] as! [[String: Any]]
+            var semantics = providers[0]["quotaSemantics"] as! [String: Any]
+            var availability = semantics["effectiveAvailability"] as! [[String: Any]]
+            availability[0]["limitingWindowIds"] = ["five_hour"]
+            semantics["effectiveAvailability"] = availability
+            providers[0]["quotaSemantics"] = semantics
+            json["providers"] = providers
+        }
+        let row = snapshot.rows[0]
+        XCTAssertEqual(row.limitingWindow, "5h")
+        XCTAssertGreaterThan(try XCTUnwrap(row.projectedExhaustedAt), try XCTUnwrap(row.resetsAt))
+        XCTAssertTrue(row.runsOutBeforeReset)
+        XCTAssertEqual(row.exhaustionResetAt, row.windows[1].resetsAt)
+    }
+
+    func testAgyWindowsStayWithinTheirOwnScope() throws {
+        let snapshot = try modified { json in
+            var providers = json["providers"] as! [[String: Any]]
+            var windows = providers[2]["windows"] as! [[String: Any]]
+            windows[0]["percentRemaining"] = 17
+            windows[3]["percentRemaining"] = 91
+            providers[2]["windows"] = windows
+            json["providers"] = providers
+        }
+        XCTAssertEqual(snapshot.rows[2].windows.map(\.percentRemaining), [17, 86])
+        XCTAssertEqual(snapshot.rows[3].windows.map(\.percentRemaining), [91, 100])
+    }
+
+    func testUntrustedWindowDoesNotPublishOldPercentages() throws {
+        let snapshot = try modified { json in
+            var providers = json["providers"] as! [[String: Any]]
+            providers[0]["state"] = ["status": "fresh", "stale": false, "untrustedWindowIds": ["five_hour"]]
+            json["providers"] = providers
+        }
+        XCTAssertNil(snapshot.rows[0].windows[0].percentRemaining)
+        XCTAssertEqual(snapshot.rows[0].windows[0].status, "unmeasurable")
+        XCTAssertEqual(snapshot.rows[0].windows[1].percentRemaining, 33)
+    }
+
+    func testInvalidWindowPercentageIsUnmeasurable() throws {
+        let snapshot = try modified { json in
+            var providers = json["providers"] as! [[String: Any]]
+            var windows = providers[0]["windows"] as! [[String: Any]]
+            windows[0]["percentRemaining"] = 101
+            providers[0]["windows"] = windows
+            json["providers"] = providers
+        }
+        XCTAssertNil(snapshot.rows[0].windows[0].percentRemaining)
+        XCTAssertEqual(snapshot.rows[0].windows[0].status, "unmeasurable")
+    }
+
+    func testVersionOneSnapshotRemainsReadableUntilRefresh() throws {
+        let snapshot = try QuotaDecoder.decode(fixture())
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: snapshot.encoded()) as? [String: Any])
+        json["version"] = 1
+        var rows = json["rows"] as! [[String: Any]]
+        for index in rows.indices {
+            rows[index].removeValue(forKey: "windowQuotas")
+            rows[index].removeValue(forKey: "runwayStatus")
+        }
+        json["rows"] = rows
+        let previous = try Snapshot.decode(JSONSerialization.data(withJSONObject: json))
+        XCTAssertEqual(previous.rows[0].percentRemaining, 33)
+        XCTAssertTrue(previous.rows[0].windows.allSatisfy { $0.percentRemaining == nil && $0.status == "refresh needed" })
     }
 }

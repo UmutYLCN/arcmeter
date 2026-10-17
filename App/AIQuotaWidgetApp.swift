@@ -1,6 +1,7 @@
 import SwiftUI
 import WidgetKit
 import QuotaCore
+import OSLog
 
 @MainActor
 @Observable
@@ -10,9 +11,11 @@ final class QuotaModel {
     var error: String?
     private let reader = QuotaReader()
     private var polling: Task<Void, Never>?
+    private let logger = Logger(subsystem: "local.ai-quota-widget", category: "Refresh")
 
     func start() {
         guard polling == nil else { return }
+        logger.info("Starting five-minute quota polling")
         polling = Task {
             await refresh()
             while !Task.isCancelled {
@@ -25,6 +28,7 @@ final class QuotaModel {
     func refresh() async {
         guard !refreshing else { return }
         refreshing = true
+        logger.info("Refreshing quota snapshot")
         defer { refreshing = false }
         do {
             let result = try await reader.read()
@@ -32,9 +36,11 @@ final class QuotaModel {
             snapshot = result
             error = nil
             WidgetCenter.shared.reloadAllTimelines()
+            logger.info("Saved quota snapshot with both usage windows")
         } catch {
             self.error = (error as? LocalizedError)?.errorDescription
                 ?? "Could not decode or save quota data. Check quota-axi and the snapshot folder, then refresh."
+            logger.error("Quota refresh failed: \(String(describing: type(of: error)), privacy: .public)")
             // Keep the last good timestamp so failure cannot make old data look fresh.
             WidgetCenter.shared.reloadAllTimelines()
         }
@@ -43,14 +49,20 @@ final class QuotaModel {
 
 @main
 struct AIQuotaWidgetApp: App {
-    @State private var model = QuotaModel()
+    @State private var model: QuotaModel
+
+    init() {
+        let model = QuotaModel()
+        _model = State(initialValue: model)
+        // Poll even when LaunchServices starts the app without opening a window.
+        model.start()
+    }
     var body: some Scene {
         WindowGroup("AI Quota Widget") {
             ContentView(model: model)
-                .onAppear { model.start() }
                 .onOpenURL { _ in NSApp.activate(ignoringOtherApps: true) }
         }
-        .defaultSize(width: 520, height: 490)
+        .defaultSize(width: 600, height: 630)
         .windowResizability(.contentSize)
     }
 }
@@ -79,22 +91,45 @@ private struct ContentView: View {
                                     Spacer()
                                     Text(row.percentRemaining.map { "\(Int($0.rounded()))% remaining" } ?? row.status)
                                 }
-                                if let percent = row.percentRemaining {
-                                    ProgressView(value: percent, total: 100)
-                                        .tint(row.runsOutBeforeReset ? .orange : .accentColor)
-                                }
-                                HStack(spacing: 4) {
-                                    Text(row.limitingWindow.map { "\($0) limit ·" } ?? "Limit unknown ·")
-                                    if let reset = row.resetsAt {
-                                        Text("Resets")
-                                        Text(reset, style: .relative)
-                                    } else { Text("Reset unknown") }
-                                    if let runout = row.projectedExhaustedAt {
-                                        Text("· Runs out")
-                                        Text(runout, style: .relative).foregroundStyle(.orange)
+                                HStack(alignment: .top, spacing: 18) {
+                                    ForEach(row.windows) { window in
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            HStack {
+                                                Text(window.period == .fiveHour ? "5-hour" : "Weekly")
+                                                    .fontWeight(window.isLimiting ? .bold : .regular)
+                                                if window.isLimiting { Text("· limiting").foregroundStyle(.secondary) }
+                                                Spacer()
+                                                Text(window.percentRemaining.map { "\(Int($0.rounded()))%" } ?? "—")
+                                            }.font(.callout)
+                                            if let percent = window.percentRemaining {
+                                                ProgressView(value: percent, total: 100)
+                                            } else {
+                                                Text(window.status).font(.caption).foregroundStyle(.secondary)
+                                            }
+                                            HStack(spacing: 3) {
+                                                Text("Resets")
+                                                if let reset = window.resetsAt { Text(reset, style: .relative) }
+                                                else { Text("not reported") }
+                                            }.font(.caption).foregroundStyle(.secondary)
+                                        }.frame(maxWidth: .infinity, alignment: .leading)
                                     }
-                                    if row.isStale(at: context.date) { Text("· Stale").foregroundStyle(.orange) }
-                                }.font(.caption).foregroundStyle(.secondary)
+                                }
+                                HStack(spacing: 3) {
+                                    if row.isStale(at: context.date) {
+                                        Text("Stale reading · refresh for a current forecast")
+                                    } else if row.runwayStatus == "exhausted_now" {
+                                        Text("Quota exhausted now")
+                                    } else if let runout = row.projectedExhaustedAt {
+                                        Text("At this pace: runs out")
+                                        Text(runout, style: .relative)
+                                        Text("·")
+                                        Text(runout, format: .dateTime.month(.abbreviated).day().hour().minute())
+                                    } else if row.runwayStatus == "through_reset" {
+                                        Text("At this pace: lasts until the next reset")
+                                    } else {
+                                        Text("Exhaustion forecast unavailable")
+                                    }
+                                }.font(.caption).foregroundStyle(row.runsOutBeforeReset ? .orange : .secondary)
                             }
                         }
                     }
@@ -116,6 +151,6 @@ private struct ContentView: View {
             Divider()
             Text("Refreshes every 5 minutes while the app is running. Keep the app running. Add AI Quota Widget using the desktop’s Edit Widgets gallery.")
                 .font(.caption).foregroundStyle(.secondary)
-        }.padding(24).frame(width: 520)
+        }.padding(24).frame(width: 600)
     }
 }
