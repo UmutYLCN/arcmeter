@@ -10,7 +10,7 @@ struct LedgerLargeView: View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 ForEach(Array(entry.tiles.enumerated()), id: \.element.id) { index, tile in
-                    if index > 0 { Rectangle().fill(Color.white.opacity(0.09)).frame(height: 1) }
+                    if index > 0 { Rectangle().fill(Color.white.opacity(0.1)).frame(height: 1) }
                     row(tile).frame(maxHeight: .infinity)
                 }
             }.padding(.bottom, 17)
@@ -30,10 +30,10 @@ struct LedgerLargeView: View {
             }
             HStack(alignment: .top, spacing: 16) {
                 window("5h", limiting: tile.fiveHourIsLow, percent: tile.fiveHour, reset: nil, tile: tile,
-                       valueSize: 22, weight: .semibold, fill: OrbitTheme.arc)
+                       valueSize: 22, weight: .semibold)
                 window("7d", limiting: tile.weeklyIsLow, percent: tile.weekly,
                        reset: ResetCountdown.text(until: tile.weeklyReset, now: entry.date), tile: tile,
-                       valueSize: 15, weight: .medium, fill: tile.weeklyIsLow ? OrbitTheme.limitingBar : OrbitTheme.weeklyBar)
+                       valueSize: 15, weight: .medium)
             }
         }
         .padding(.vertical, 8)
@@ -41,7 +41,7 @@ struct LedgerLargeView: View {
     }
 
     private func window(_ label: String, limiting: Bool, percent: Double?, reset: String?, tile: ProviderTile,
-                        valueSize: CGFloat, weight: Font.Weight, fill: Color) -> some View {
+                        valueSize: CGFloat, weight: Font.Weight) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(label + (limiting ? "*" : "")).font(.system(size: 9)).foregroundStyle(OrbitTheme.muted)
@@ -53,7 +53,7 @@ struct LedgerLargeView: View {
             }
             GeometryReader { geometry in
                 Capsule().fill(OrbitTheme.track).overlay(alignment: .leading) {
-                    Capsule().fill(fill).frame(width: geometry.size.width * RingGauge.fraction(percent))
+                    Capsule().fill(OrbitTheme.fill(percent)).frame(width: geometry.size.width * RingGauge.fraction(percent))
                 }
             }.frame(height: 3)
         }

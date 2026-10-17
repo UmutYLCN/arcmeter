@@ -82,6 +82,19 @@ public enum RingGauge {
     }
 }
 
+/// How alarming a remaining-quota reading is; each indicator is judged on its own value.
+public enum QuotaLevel: Sendable, Equatable {
+    case normal, warning, critical
+
+    public static let warningBelow = 20.0
+    public static let criticalBelow = 10.0
+
+    public init(remaining percent: Double?) {
+        guard let percent, percent.isFinite else { self = .normal; return }
+        self = percent < Self.criticalBelow ? .critical : (percent < Self.warningBelow ? .warning : .normal)
+    }
+}
+
 public enum SegmentBar {
     /// Lit segments out of `count` for a remaining-quota percentage.
     public static func filled(_ percent: Double?, count: Int) -> Int {

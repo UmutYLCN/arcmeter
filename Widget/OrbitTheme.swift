@@ -1,3 +1,4 @@
+import QuotaCore
 import SwiftUI
 
 extension Color {
@@ -6,21 +7,36 @@ extension Color {
     }
 }
 
-/// Orbit's dark palette, shared by the ring and ledger layouts.
+/// Arcmeter's palette: glossy black with white gauges that turn orange, then red, as quota runs out.
 enum OrbitTheme {
-    static let top = Color(hex: 0x263A4A)
-    static let bottom = Color(hex: 0x141D2A)
-    static let text = Color(hex: 0xF0F5FB)
-    static let muted = Color(hex: 0xB3C1CD)
-    static let weekly = Color(hex: 0xDCE7EC)
-    static let logo = Color(hex: 0xE3EDF3)
-    static let track = Color(hex: 0x3B4F5E)
-    static let arc = Color(hex: 0xA9D4D4)
-    static let stale = Color(hex: 0xFFB570)
-    static let weeklyBar = Color(hex: 0x819CAA)
-    static let limitingBar = Color(hex: 0xDDA16E)
+    static let top = Color(hex: 0x17171A)
+    static let bottom = Color(hex: 0x030304)
+    static let text = Color.white
+    static let muted = Color.white.opacity(0.62)
+    static let weekly = Color.white.opacity(0.9)
+    static let logo = Color.white
+    static let track = Color.white.opacity(0.17)
+    static let gauge = Color.white
+    static let warning = Color(hex: 0xFF9F0A)
+    static let critical = Color(hex: 0xFF453A)
+    /// Authorization and stale cues share the warning orange.
+    static let stale = warning
 
+    /// White while healthy; orange below 20% remaining, red below 10%.
+    static func fill(_ percent: Double?) -> Color {
+        switch QuotaLevel(remaining: percent) {
+        case .normal: return gauge
+        case .warning: return warning
+        case .critical: return critical
+        }
+    }
+
+    /// Deep black with a soft sheen across the top edge, as WidgetKit can render it.
     static var background: some View {
-        LinearGradient(colors: [top, bottom], startPoint: .topLeading, endPoint: .bottomTrailing)
+        ZStack {
+            LinearGradient(colors: [top, bottom], startPoint: .top, endPoint: .bottom)
+            LinearGradient(stops: [.init(color: .white.opacity(0.13), location: 0), .init(color: .white.opacity(0.03), location: 0.32),
+                                   .init(color: .clear, location: 0.55)], startPoint: .top, endPoint: .bottom)
+        }
     }
 }

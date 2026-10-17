@@ -1,13 +1,13 @@
-# AI Quota Widget
+# Arcmeter
 
-A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`), in the dark **Orbit** design. The 5-hour window is the primary reading, drawn as a ring (half-circle on the small tile) with the remaining percentage inside; the weekly window sits below as `7d 33%` over ten thin segments, with its reset countdown. A `*` and amber segments mark a limiting window that is running low (50% or less).
+A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`), in the **Orbit** design on a glossy black background. The Xcode project, scheme, and `AIQuotaWidget.app` bundle keep their original file names so the installed widget registration and shared snapshot keep working; the user-visible name is Arcmeter. The 5-hour window is the primary reading, drawn as a ring (half-circle on the small tile) with the remaining percentage inside; the weekly window sits below as `7d 33%` over ten thin segments, with its reset countdown. Rings, the half-circle, and weekly segments are white on a dim track; each indicator turns orange when its remaining quota drops below 20% and red below 10%, independently for the 5-hour and weekly windows. A `*` marks a limiting window that is running low (50% or less).
 
 - **Small:** one provider per tile. Tap `›` to advance Claude, Codex, agy Gemini, agy Claude/GPT. WidgetKit has no swipe, so this is an interactive AppIntent button (macOS 14+); the current index is kept in the widget extension's own preferences.
 - **Medium:** all four providers in a row, each with a 5h ring.
 - **Large:** the same four providers in a 2x2 grid.
 - **Orbit Ledger (separate large widget):** one row per provider with the 5h and 7d bars side by side.
 
-Provider marks (Claude, Codex, Gemini, Antigravity) are vector shapes drawn in `Widget/ProviderMarks.swift`; the Antigravity mark follows the official full-color icon. Stale data shows a clock badge, `STALE`, and `Updated N min ago`; a missing snapshot shows dashed rings with a crossed-out cloud and **No data**; a Claude authorization problem shows a lock and **Authorization needed**. The widget does not show run-out forecasts.
+Provider marks (Claude, Codex, Gemini, Antigravity) are vector shapes drawn in `Widget/ProviderMarks.swift`; the Antigravity mark follows the official full-color icon. Stale data shows a small clock badge on the affected provider (the widgets print no "Updated" text); a missing snapshot shows dashed rings with a crossed-out cloud and **No data**; a Claude authorization problem shows a lock and **Authorization needed**. The widget does not show run-out forecasts.
 
 Requires macOS 15+, Xcode 16+ (tested with Xcode 26.3), and an existing `/usr/local/bin/quota-axi` installation. No package downloads, XcodeGen, Apple ID, or paid developer account are required. The project uses local ad-hoc signing; leave Signing Certificate set to **Sign to Run Locally** and do not select a development team.
 
@@ -34,12 +34,12 @@ open DerivedData/Build/Products/Debug/AIQuotaWidget.app
 
 1. Let the first refresh finish. All four quota rows should appear in the host app.
 2. Control-click the desktop and choose **Edit Widgets**.
-3. Search for **AI Quota Orbit** (small, medium, or large) or **AI Quota Orbit Ledger** (large), then drag it onto the desktop.
+3. Search for **Arcmeter** (small, medium, or large) or **Arcmeter Ledger** (large), then drag it onto the desktop.
 4. Keep the host app running. It refreshes immediately on launch and every five minutes; **Refresh** requests a new read. Clicking the widget opens the host app.
 
 If the gallery has not discovered the app, run it once from Xcode, close and reopen the gallery, and search again. For a stable installed location, copy the built app to your user Applications folder and launch that copy. Replacing a build can require removing and re-adding the widget.
 
-A closed host window does not quit the process; reopen the app to show its window. Quitting the app or sleeping the Mac pauses reads. WidgetKit schedules display updates and can delay them; it is not a continuous background polling service. After 30 minutes without fresh data, the widget shows **STALE**. Missing or unreadable snapshots show all providers with **No data** and an instruction to open the app. Provider-side stale data is also marked stale. An omitted provider, unknown scope, failed authorization, or unmeasurable limit is never represented as 0% or 100%.
+A closed host window does not quit the process; reopen the app to show its window. Quitting the app or sleeping the Mac pauses reads. WidgetKit schedules display updates and can delay them; it is not a continuous background polling service. After 30 minutes without fresh data, the widget marks every provider with the clock badge. Missing or unreadable snapshots show all providers with **No data** and an instruction to open the app. Provider-side stale data is also marked stale. An omitted provider, unknown scope, failed authorization, or unmeasurable limit is never represented as 0% or 100%.
 
 Claude reads always include `--allow-keychain-prompt`. If Claude reports **authorization needed**, follow the host app's hint: run `/usr/local/bin/quota-axi --provider claude --allow-keychain-prompt` in Terminal, re-authorize if needed, approve Keychain access with **Always Allow**, and refresh. A whole-command or decoding failure retains the last successful snapshot and its original timestamp, and displays an error in the host app.
 

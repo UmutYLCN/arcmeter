@@ -12,8 +12,8 @@ struct AIQuotaWidgets: WidgetBundle {
 struct AIQuotaWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: WidgetKind.orbit, provider: QuotaTimeline()) { QuotaWidgetView(entry: $0) }
-            .configurationDisplayName("AI Quota Orbit")
-            .description("Remaining 5-hour quota as a ring, with weekly quota and reset, for Claude, Codex, and agy.")
+            .configurationDisplayName("Arcmeter")
+            .description("Arcmeter shows remaining 5-hour quota as a ring, with weekly quota and reset, for Claude, Codex, and agy.")
             .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
             .contentMarginsDisabled()
     }
@@ -22,8 +22,8 @@ struct AIQuotaWidget: Widget {
 struct AIQuotaLedgerWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: WidgetKind.ledger, provider: QuotaTimeline()) { LedgerWidgetView(entry: $0) }
-            .configurationDisplayName("AI Quota Orbit Ledger")
-            .description("One row per provider with 5-hour and weekly bars side by side.")
+            .configurationDisplayName("Arcmeter Ledger")
+            .description("Arcmeter with one row per provider and 5-hour and weekly bars side by side.")
             .supportedFamilies([.systemLarge])
             .contentMarginsDisabled()
     }

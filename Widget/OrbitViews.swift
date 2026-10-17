@@ -20,7 +20,7 @@ struct OrbitRing: View {
             Circle().stroke(OrbitTheme.track, lineWidth: stroke).frame(width: diameter, height: diameter)
             if RingGauge.fraction(tile.fiveHour) > 0 {
                 Circle().trim(from: 0, to: RingGauge.fraction(tile.fiveHour))
-                    .stroke(OrbitTheme.arc, style: StrokeStyle(lineWidth: stroke, lineCap: .round))
+                    .stroke(OrbitTheme.fill(tile.fiveHour), style: StrokeStyle(lineWidth: stroke, lineCap: .round))
                     .rotationEffect(.degrees(-90)).frame(width: diameter, height: diameter)
             }
             VStack(spacing: 1) {
@@ -43,20 +43,12 @@ struct OrbitRing: View {
     }
 }
 
+/// Only the empty state is spelled out; freshness shows as the per-provider clock badge.
 struct OrbitFooter: View {
     let entry: QuotaEntry
     var body: some View {
-        HStack(spacing: 3) {
-            if entry.snapshot == nil {
-                Text("No data · open app to refresh")
-            } else {
-                if entry.isStale { Text("STALE ·").foregroundStyle(OrbitTheme.stale).fontWeight(.bold) }
-                if let generatedAt = entry.snapshot?.generatedAt {
-                    Text("Updated " + ElapsedText.text(since: generatedAt, now: entry.date) + " ago")
-                }
-            }
-        }
-        .font(.system(size: 8)).foregroundStyle(OrbitTheme.muted).lineLimit(1)
+        Text(entry.snapshot == nil ? "No data · open app to refresh" : " ")
+            .font(.system(size: 8)).foregroundStyle(OrbitTheme.muted).lineLimit(1)
     }
 }
 
@@ -88,7 +80,7 @@ struct OrbitHalfGauge: View {
                 .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
             if fraction > 0 {
                 HalfArc().trim(from: 0, to: fraction)
-                    .stroke(OrbitTheme.arc, style: StrokeStyle(lineWidth: line, lineCap: .round))
+                    .stroke(OrbitTheme.fill(tile.fiveHour), style: StrokeStyle(lineWidth: line, lineCap: .round))
                     .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
             }
             VStack(spacing: 3) {
@@ -115,7 +107,6 @@ struct OrbitHalfGauge: View {
 /// W1: ten thin segments; each lights up for a tenth of the remaining weekly quota.
 struct OrbitSegmentBar: View {
     let percent: Double?
-    let limiting: Bool
     var height: CGFloat = 5
     var gap: CGFloat = 2
 
@@ -124,7 +115,7 @@ struct OrbitSegmentBar: View {
         HStack(spacing: gap) {
             ForEach(0..<10, id: \.self) { index in
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(index < filled ? (limiting ? OrbitTheme.limitingBar : OrbitTheme.weeklyBar) : OrbitTheme.track)
+                    .fill(index < filled ? OrbitTheme.fill(percent) : OrbitTheme.track)
                     .frame(height: height)
             }
         }
@@ -143,8 +134,6 @@ struct OrbitWeeklyBar: View {
     let tile: ProviderTile
     let entry: QuotaEntry
     let metrics: Metrics
-    /// Small tiles have no footer, so freshness and missing-data states replace the reset line.
-    var showsStatus = false
 
     var body: some View {
         let reset = ResetCountdown.text(until: tile.weeklyReset, now: entry.date)
@@ -155,15 +144,11 @@ struct OrbitWeeklyBar: View {
                 Text(tile.weekly.map { "\(PercentText.text($0))%" } ?? "—").fontWeight(.semibold)
                     .foregroundStyle(OrbitTheme.weekly)
             }.font(.system(size: metrics.text)).monospacedDigit()
-            OrbitSegmentBar(percent: tile.weekly, limiting: tile.weeklyIsLow,
+            OrbitSegmentBar(percent: tile.weekly,
                             height: metrics.barHeight, gap: metrics.segmentGap)
             Group {
                 if tile.availability == .authorizationNeeded {
                     Text("Authorize").foregroundStyle(OrbitTheme.stale)
-                } else if showsStatus && entry.isStale, let generatedAt = entry.snapshot?.generatedAt {
-                    HStack(spacing: 2) {
-                        Text("Updated " + ElapsedText.text(since: generatedAt, now: entry.date) + " ago")
-                    }.foregroundStyle(OrbitTheme.stale)
                 } else if let reset {
                     Text("↻ " + reset)
                 } else {
@@ -187,16 +172,16 @@ struct OrbitSmallView: View {
         VStack(spacing: 0) {
             HStack(spacing: 6) {
                 if entry.snapshot == nil {
-                    Image(systemName: "gauge.with.dots.needle.33percent").font(.system(size: 13)).foregroundStyle(OrbitTheme.arc)
+                    Image(systemName: "gauge.with.dots.needle.33percent").font(.system(size: 13)).foregroundStyle(OrbitTheme.gauge)
                         .frame(width: 17, height: 17)
-                    Text("AI Quota").font(.system(size: 10, weight: .semibold))
+                    Text("Arcmeter").font(.system(size: 10, weight: .semibold))
                     Spacer(minLength: 0)
                 } else {
                     ProviderLogo(mark: tile.mark, size: 17)
                     Text(tile.name).font(.system(size: 10, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
                     Spacer(minLength: 0)
                     Button(intent: NextProviderIntent()) {
-                        Text("›").font(.system(size: 25)).foregroundStyle(Color(hex: 0xBBCCD7))
+                        Text("›").font(.system(size: 25)).foregroundStyle(Color.white.opacity(0.7))
                             .frame(width: 28, height: 28).contentShape(Rectangle())
                     }.buttonStyle(.plain).accessibilityLabel("Next provider")
                 }
@@ -205,8 +190,7 @@ struct OrbitSmallView: View {
             OrbitHalfGauge(tile: tile)
             Spacer(minLength: 0)
             if tile.availability == .measured {
-                OrbitWeeklyBar(tile: tile, entry: entry, metrics: .init(text: 10, spacing: 5, barHeight: 5, segmentGap: 2),
-                               showsStatus: true)
+                OrbitWeeklyBar(tile: tile, entry: entry, metrics: .init(text: 10, spacing: 5, barHeight: 5, segmentGap: 2))
             } else {
                 stateNote(tile)
             }

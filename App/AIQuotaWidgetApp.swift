@@ -58,7 +58,7 @@ struct AIQuotaWidgetApp: App {
         model.start()
     }
     var body: some Scene {
-        WindowGroup("AI Quota Widget") {
+        WindowGroup("Arcmeter") {
             ContentView(model: model)
                 .onOpenURL { _ in NSApp.activate(ignoringOtherApps: true) }
         }
@@ -73,7 +73,7 @@ private struct ContentView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text("AI quota").font(.largeTitle.bold())
+                    Text("Arcmeter").font(.largeTitle.bold())
                     Text("Remaining usage, at a glance").foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -133,7 +133,7 @@ private struct ContentView: View {
                     .font(.callout).textSelection(.enabled)
             }
             Divider()
-            Text("Refreshes every 5 minutes while the app is running. Keep the app running. Add AI Quota Widget using the desktop’s Edit Widgets gallery.")
+            Text("Refreshes every 5 minutes while the app is running. Keep the app running. Add Arcmeter using the desktop’s Edit Widgets gallery.")
                 .font(.caption).foregroundStyle(.secondary)
         }.padding(24).frame(width: 600)
     }

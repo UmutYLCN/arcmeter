@@ -58,6 +58,13 @@ final class DisplayTests: XCTestCase {
         XCTAssertEqual(PercentText.text(nil), "—")
     }
 
+    func testQuotaLevelWarnsBelowTwentyAndAlertsBelowTen() {
+        XCTAssertEqual([100.0, 50, 20, 19.9, 10, 9.9, 0].map { QuotaLevel(remaining: $0) },
+                       [.normal, .normal, .normal, .warning, .warning, .critical, .critical])
+        XCTAssertEqual(QuotaLevel(remaining: nil), .normal)
+        XCTAssertEqual(QuotaLevel(remaining: .nan), .normal)
+    }
+
     func testSegmentBarLightsTenthsOfRemainingQuota() {
         XCTAssertEqual([33.0, 84, 86, 100, 0].map { SegmentBar.filled($0, count: 10) }, [3, 8, 9, 10, 0])
         XCTAssertEqual(SegmentBar.filled(nil, count: 10), 0)

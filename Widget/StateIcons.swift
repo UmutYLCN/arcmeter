@@ -53,7 +53,7 @@ struct StaleBadge: View {
     let size: CGFloat
 
     var body: some View {
-        Circle().fill(Color(hex: 0x2A2430)).overlay(Circle().stroke(OrbitTheme.stale.opacity(0.55), lineWidth: 1))
+        Circle().fill(Color(hex: 0x1C1C1F)).overlay(Circle().stroke(OrbitTheme.stale.opacity(0.55), lineWidth: 1))
             .overlay(StateIcon(kind: .clock, size: size * 0.6, color: OrbitTheme.stale))
             .frame(width: size, height: size)
     }
