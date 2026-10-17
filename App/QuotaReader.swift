@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import QuotaCore
 
@@ -19,7 +20,9 @@ actor QuotaReader {
         process.executableURL = URL(fileURLWithPath: "/usr/local/bin/quota-axi")
         process.arguments = ["--json", "--allow-keychain-prompt", "--provider", "claude,codex,agy"]
         var environment = ProcessInfo.processInfo.environment
-        environment["PATH"] = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        // getpwuid resolves the real home even inside the widget's sandbox container, as SnapshotStore does.
+        let home = getpwuid(getuid()).map { String(cString: $0.pointee.pw_dir) } ?? NSHomeDirectory()
+        environment["PATH"] = QuotaRunnerPath.make(home: home)
         environment.removeValue(forKey: "QUOTA_AXI_SNAPSHOT")
         environment.removeValue(forKey: "QUOTA_AXI_MAX_AGE")
         process.environment = environment

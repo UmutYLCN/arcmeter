@@ -83,6 +83,12 @@
 			path = "QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift";
 			sourceTree = "<group>";
 		};
+		38BA94907373B5B605D774FE = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "QuotaCore/Tests/QuotaCoreTests/QuotaRunnerPathTests.swift";
+			sourceTree = "<group>";
+		};
 		6FC1F09BE441258BA67129D1 = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "folder";
@@ -223,7 +229,7 @@
 				ENABLE_APP_SANDBOX = "NO";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "7";
+				CURRENT_PROJECT_VERSION = "8";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				ENABLE_TESTABILITY = "YES";
 				DEBUG_INFORMATION_FORMAT = "dwarf";
@@ -250,7 +256,7 @@
 				ENABLE_APP_SANDBOX = "NO";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "7";
+				CURRENT_PROJECT_VERSION = "8";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
@@ -391,7 +397,7 @@
 				APPLICATION_EXTENSION_API_ONLY = "YES";
 				SKIP_INSTALL = "YES";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "7";
+				CURRENT_PROJECT_VERSION = "8";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				ENABLE_TESTABILITY = "YES";
 				DEBUG_INFORMATION_FORMAT = "dwarf";
@@ -420,7 +426,7 @@
 				APPLICATION_EXTENSION_API_ONLY = "YES";
 				SKIP_INSTALL = "YES";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "7";
+				CURRENT_PROJECT_VERSION = "8";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
@@ -469,12 +475,17 @@
 			isa = "PBXBuildFile";
 			fileRef = D31E73F2D7BBC691EEEC4401;
 		};
+		ABD26AB5AF36E7105DBF6104 = {
+			isa = "PBXBuildFile";
+			fileRef = 38BA94907373B5B605D774FE;
+		};
 		958D3F09ECF9A53A32473F3D = {
 			isa = "PBXSourcesBuildPhase";
 			buildActionMask = "2147483647";
 			files = (
 				8AAF0A79B81240EFE504E69E,
 				0C2F23DB84237BFA04B95A39,
+				ABD26AB5AF36E7105DBF6104,
 			);
 			runOnlyForDeploymentPostprocessing = "0";
 		};
@@ -604,6 +615,7 @@
 				C8D333DB77780A5F4A52B812,
 				FA0656FB53880C42D350790D,
 				D31E73F2D7BBC691EEEC4401,
+				38BA94907373B5B605D774FE,
 				6FC1F09BE441258BA67129D1,
 				BD12731D7BC9B843D8523E65,
 				4EDC8BFAFC6BD936B849F38C,

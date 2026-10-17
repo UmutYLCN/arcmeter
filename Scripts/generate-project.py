@@ -46,7 +46,7 @@ sources = {}
 WIDGET_FILES = ['Widget/QuotaWidget.swift', 'Widget/AIQuotaWidget.swift', 'Widget/OrbitTheme.swift', 'Widget/OrbitViews.swift',
                 'Widget/LedgerView.swift', 'Widget/ProviderMarks.swift', 'Widget/StateIcons.swift', 'Widget/QuotaIntents.swift']
 for path in ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'] + WIDGET_FILES + [
-             'QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift']:
+             'QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift', 'QuotaCore/Tests/QuotaCoreTests/QuotaRunnerPathTests.swift']:
     sources[path] = add(path, 'PBXFileReference', lastKnownFileType='sourcecode.swift', path=path, sourceTree='<group>')
 fixture = add('Fixtures', 'PBXFileReference', lastKnownFileType='folder', path='QuotaCore/Tests/QuotaCoreTests/Fixtures', sourceTree='<group>')
 assets = add('Assets', 'PBXFileReference', lastKnownFileType='folder.assetcatalog', path='App/Assets.xcassets', sourceTree='<group>')
@@ -56,13 +56,13 @@ for name, product, kind, files, extra in [
     ('AIQuotaWidget', 'Arcmeter.app', 'application', ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/App-Info.plist', PRODUCT_NAME='Arcmeter', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget',
           ENABLE_APP_SANDBOX='NO', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon',
-          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='7')),
+          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='8')),
     ('QuotaWidgetExtension', 'QuotaWidgetExtension.appex', 'app-extension', WIDGET_FILES + ['Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/Widget-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.widget',
           CODE_SIGN_ENTITLEMENTS='Config/Widget.entitlements', ENABLE_APP_SANDBOX='YES',
           APPLICATION_EXTENSION_API_ONLY='YES', SKIP_INSTALL='YES',
-          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='7')),
-    ('QuotaCoreTests', 'QuotaCoreTests.xctest', 'bundle.unit-test', ['QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift'],
+          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='8')),
+    ('QuotaCoreTests', 'QuotaCoreTests.xctest', 'bundle.unit-test', ['QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift', 'QuotaCore/Tests/QuotaCoreTests/QuotaRunnerPathTests.swift'],
      dict(GENERATE_INFOPLIST_FILE='YES', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.tests')),
 ]:
     product_ref = add(name+'Product', 'PBXFileReference', explicitFileType={'application':'wrapper.application','app-extension':'wrapper.app-extension','bundle.unit-test':'wrapper.cfbundle'}[kind],
