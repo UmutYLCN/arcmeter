@@ -3,7 +3,8 @@
 A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`), in the **Orbit** design on a glossy black background. The Xcode project, scheme, and `AIQuotaWidget.app` bundle keep their original file names so the installed widget registration and shared snapshot keep working; the user-visible name is Arcmeter. The 5-hour window is the primary reading, drawn as a ring (half-circle on the small tile) with the remaining percentage inside; the weekly window sits below as `7d 33%` over ten thin segments, with its reset countdown. Rings, the half-circle, and weekly segments are white on a dim track; each indicator turns orange when its remaining quota drops below 20% and red below 10%, independently for the 5-hour and weekly windows. A `*` marks a limiting window that is running low (50% or less).
 
 - **Small:** one provider per tile. Tap `›` to advance Claude, Codex, agy Gemini, agy Claude/GPT. WidgetKit has no swipe, so this is an interactive AppIntent button (macOS 14+); the current index is kept in the widget extension's own preferences.
-- **Medium:** all four providers in a row, each with a 5h ring.
+- **Medium:** all four providers in a row, each with a 5h ring; the row shrinks to stay inside the system content margins.
+- **Extra large:** the same four-provider row at the full content sizes with room around it.
 - **Large:** the same four providers in a 2x2 grid.
 - **Orbit Ledger (separate large widget):** one row per provider with the 5h and 7d bars side by side.
 
@@ -34,7 +35,7 @@ open DerivedData/Build/Products/Debug/AIQuotaWidget.app
 
 1. Let the first refresh finish. All four quota rows should appear in the host app.
 2. Control-click the desktop and choose **Edit Widgets**.
-3. Search for **Arcmeter** (small, medium, or large) or **Arcmeter Ledger** (large), then drag it onto the desktop.
+3. Search for **Arcmeter** (small, medium, large, or extra large) or **Arcmeter Ledger** (large), then drag it onto the desktop.
 4. Keep the host app running. It refreshes immediately on launch and every five minutes; **Refresh** requests a new read. Clicking the widget opens the host app.
 
 If the gallery has not discovered the app, run it once from Xcode, close and reopen the gallery, and search again. For a stable installed location, copy the built app to your user Applications folder and launch that copy. Replacing a build can require removing and re-adding the widget.
@@ -45,7 +46,7 @@ Claude reads always include `--allow-keychain-prompt`. If Claude reports **autho
 
 ## Additional local checks
 
-After building, `Scripts/preview.sh` renders the small (all four provider frames), medium, large, and ledger layouts with the captured reading, low quota, stale data, missing data, and Claude authorization required to `DerivedData/Previews/`.
+After building, `Scripts/preview.sh` renders the small (all four provider frames), medium, large, extra large, and ledger layouts at macOS widget sizes with a 16 pt system content margin applied, with the captured reading, low quota, stale data, missing data, and Claude authorization required to `DerivedData/Previews/`.
 
 After launching the host and waiting for its first successful refresh, `Scripts/verify-sandbox.sh` builds an ad-hoc signed sandbox probe with the extension's exact entitlements. It checks that the shared snapshot contains all three providers, can be read, and cannot be opened for writing. This does not place a widget on the desktop; add the widget from the gallery to complete the interactive check.
 

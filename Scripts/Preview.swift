@@ -31,8 +31,12 @@ struct Preview {
         }
         lowReport["providers"] = lowProviders
         let low = try QuotaDecoder.decode(JSONSerialization.data(withJSONObject: lowReport))
-        let sizes: [(String, CGSize)] = [("small", CGSize(width: 170, height: 170)), ("medium", CGSize(width: 364, height: 170)),
-                                         ("large", CGSize(width: 364, height: 382)), ("ledger", CGSize(width: 364, height: 382))]
+        // macOS widget sizes, rendered with the system content margins applied around the view the way WidgetKit
+        // does when margins are not disabled, so anything that only fits without them shows up clipped here.
+        let margin: CGFloat = 16
+        let sizes: [(String, CGSize)] = [("small", CGSize(width: 158, height: 158)), ("medium", CGSize(width: 338, height: 158)),
+                                         ("large", CGSize(width: 338, height: 354)), ("xlarge", CGSize(width: 715, height: 354)),
+                                         ("ledger", CGSize(width: 338, height: 354))]
         var count = 0
         for (name, size) in sizes {
             for state in ["fresh", "low", "stale", "missing", "auth"] {
@@ -47,9 +51,10 @@ struct Preview {
                     case "small": content = AnyView(OrbitSmallView(entry: entry))
                     case "medium": content = AnyView(OrbitMediumView(entry: entry))
                     case "large": content = AnyView(OrbitLargeView(entry: entry))
+                    case "xlarge": content = AnyView(OrbitExtraLargeView(entry: entry))
                     default: content = AnyView(LedgerLargeView(entry: entry))
                     }
-                    let framed = content.frame(width: size.width, height: size.height)
+                    let framed = content.padding(margin).frame(width: size.width, height: size.height)
                         .background(OrbitTheme.background).clipShape(RoundedRectangle(cornerRadius: 23))
                     let renderer = ImageRenderer(content: framed)
                     renderer.scale = 2
@@ -62,7 +67,7 @@ struct Preview {
                 }
             }
         }
-        print("Rendered \(count) Orbit widget previews (small, medium, large, ledger) to DerivedData/Previews.")
+        print("Rendered \(count) Orbit widget previews (small, medium, large, xlarge, ledger) to DerivedData/Previews.")
     }
 
     static func require<T>(_ value: T?) throws -> T {

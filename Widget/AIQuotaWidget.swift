@@ -14,7 +14,7 @@ struct AIQuotaWidget: Widget {
         StaticConfiguration(kind: WidgetKind.orbit, provider: QuotaTimeline()) { QuotaWidgetView(entry: $0) }
             .configurationDisplayName("Arcmeter")
             .description("Arcmeter shows remaining 5-hour quota as a ring, with weekly quota and reset, for Claude, Codex, and agy.")
-            .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+            .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
             .contentMarginsDisabled()
     }
 }

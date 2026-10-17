@@ -61,25 +61,41 @@ struct HalfArc: Shape {
 }
 
 /// Small tile's 5h gauge: a semicircle with the remaining percentage inside the arc.
+/// Everything is laid out on one centre line and the whole gauge shrinks to the width it is given.
 struct OrbitHalfGauge: View {
     let tile: ProviderTile
+    private static let design = CGSize(width: 124, height: 70)
     private let radius: CGFloat = 48.7
     private let line: CGFloat = 9.3
 
     var body: some View {
+        GeometryReader { proxy in
+            let scale = min(1.06, proxy.size.width / Self.design.width)
+            gauge
+                .frame(width: Self.design.width, height: Self.design.height)
+                .scaleEffect(scale)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .frame(height: Self.design.height)
+        .opacity(tile.isStale ? OrbitTheme.dimmed : 1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(tile.name) 5-hour: " + (tile.fiveHour.map { "\(Int($0.rounded())) percent remaining" } ?? "no data"))
+    }
+
+    private var gauge: some View {
         let fraction = RingGauge.fraction(tile.fiveHour)
-        ZStack(alignment: .bottom) {
+        return ZStack(alignment: .bottom) {
             if let icon = tile.emptyIcon {
                 HalfArc().stroke(OrbitTheme.track, style: StrokeStyle(lineWidth: line * 0.7, lineCap: .round, dash: [0.01, 11]))
-                    .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
+                    .frame(width: radius * 2, height: radius).padding(.bottom, 10)
                 StateIcon(kind: icon, size: 30, color: OrbitTheme.muted).padding(.bottom, 6)
             } else {
             HalfArc().stroke(OrbitTheme.track, style: StrokeStyle(lineWidth: line, lineCap: .round))
-                .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
+                .frame(width: radius * 2, height: radius).padding(.bottom, 10)
             if fraction > 0 {
                 HalfArc().trim(from: 0, to: fraction)
                     .stroke(OrbitTheme.fill(tile.fiveHour), style: StrokeStyle(lineWidth: line, lineCap: .round))
-                    .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
+                    .frame(width: radius * 2, height: radius).padding(.bottom, 10)
             }
             VStack(spacing: 3) {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
@@ -92,11 +108,6 @@ struct OrbitHalfGauge: View {
             .padding(.bottom, -7)
             }
         }
-        .scaleEffect(1.06)
-        .frame(width: 124, height: 70)
-        .opacity(tile.isStale ? OrbitTheme.dimmed : 1)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(tile.name) 5-hour: " + (tile.fiveHour.map { "\(Int($0.rounded())) percent remaining" } ?? "no data"))
     }
 }
 
@@ -204,35 +215,83 @@ extension OrbitSmallView {
             Text(authorize ? "Authorization needed" : (entry.snapshot == nil ? "No data" : "No reading"))
                 .fontWeight(.semibold).foregroundStyle(OrbitTheme.text)
             Text(authorize ? "Open app to authorize" : "Open app to refresh").foregroundStyle(OrbitTheme.muted)
-        }.font(.system(size: 10)).multilineTextAlignment(.center).frame(height: 31)
+        }.font(.system(size: 10)).lineLimit(1).minimumScaleFactor(0.7).multilineTextAlignment(.center).frame(height: 31)
+    }
+}
+
+/// Shrinks its content to fit the space it is offered; never scales it up.
+struct FitToSpace<Content: View>: View {
+    let design: CGSize
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        GeometryReader { proxy in
+            let scale = min(1, proxy.size.width / design.width, proxy.size.height / design.height)
+            content
+                .frame(width: design.width, height: design.height)
+                .scaleEffect(scale)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+    }
+}
+
+/// The four-provider ring row. Medium and extra large share the content sizes (ring 82, 11 pt weekly text);
+/// only the room around them differs, and the row shrinks to stay inside the widget's content margins.
+struct OrbitRowView: View {
+    struct Layout {
+        let tileWidth: CGFloat
+        let spacing: CGFloat
+        let gap: CGFloat
+        let barWidth: CGFloat?
+        let height: CGFloat
+
+        var design: CGSize { CGSize(width: tileWidth * 4 + spacing * 3, height: height) }
+
+        static let medium = Layout(tileWidth: 84, spacing: 6, gap: 2, barWidth: nil, height: 142)
+        static let extraLarge = Layout(tileWidth: 150, spacing: 24, gap: 14, barWidth: 112, height: 190)
+    }
+
+    @Environment(\.widgetContentMargins) private var margins
+    let entry: QuotaEntry
+    let layout: Layout
+
+    var body: some View {
+        FitToSpace(design: layout.design) {
+            VStack(spacing: 0) {
+                HStack(alignment: .top, spacing: layout.spacing) {
+                    ForEach(entry.tiles) { tile in
+                        VStack(spacing: 0) {
+                            HStack(spacing: 3) {
+                                ProviderLogo(mark: tile.mark, size: 14)
+                                Text(tile.name).font(.system(size: 9, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                                StaleMark(tile: tile, size: 8)
+                            }
+                            Spacer(minLength: layout.gap)
+                            OrbitRing(tile: tile, size: 82, numberSize: 20)
+                            Spacer(minLength: layout.gap)
+                            OrbitWeeklyBar(tile: tile, entry: entry,
+                                           metrics: .init(text: 11, spacing: 3, barHeight: 5, segmentGap: 1.5))
+                                .frame(width: layout.barWidth)
+                        }.frame(width: layout.tileWidth)
+                    }
+                }
+                OrbitFooter(entry: entry).padding(.top, 4)
+            }
+        }
+        .padding(.leading, max(margins.leading, 12)).padding(.trailing, max(margins.trailing, 12))
+        .padding(.top, max(margins.top, 12)).padding(.bottom, max(margins.bottom, 12))
+        .foregroundStyle(OrbitTheme.text)
     }
 }
 
 struct OrbitMediumView: View {
     let entry: QuotaEntry
+    var body: some View { OrbitRowView(entry: entry, layout: .medium) }
+}
 
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: 6) {
-                ForEach(entry.tiles) { tile in
-                    VStack(spacing: 0) {
-                        HStack(spacing: 3) {
-                            ProviderLogo(mark: tile.mark, size: 14)
-                            Text(tile.name).font(.system(size: 9, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
-                            StaleMark(tile: tile, size: 8)
-                        }
-                        Spacer(minLength: 2)
-                        OrbitRing(tile: tile, size: 82, numberSize: 20)
-                        Spacer(minLength: 2)
-                        OrbitWeeklyBar(tile: tile, entry: entry,
-                                       metrics: .init(text: 11, spacing: 3, barHeight: 5, segmentGap: 1.5))
-                    }.frame(maxWidth: .infinity)
-                }
-            }
-            OrbitFooter(entry: entry).padding(.top, 4)
-        }
-        .padding(.horizontal, 10).padding(.vertical, 10).foregroundStyle(OrbitTheme.text)
-    }
+struct OrbitExtraLargeView: View {
+    let entry: QuotaEntry
+    var body: some View { OrbitRowView(entry: entry, layout: .extraLarge) }
 }
 
 struct OrbitLargeView: View {
