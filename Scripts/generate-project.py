@@ -36,6 +36,11 @@ def configs(name, base):
     return add(name+'Configs', 'XCConfigurationList', buildConfigurations=configs,
                defaultConfigurationIsVisible='0', defaultConfigurationName='Release')
 
+# actool writes only four sizes into the legacy AppIcon.icns, so rebuild it from the complete appiconset.
+ICON_SCRIPT = ('set -eu; iconset="${TARGET_TEMP_DIR}/AppIcon.iconset"; rm -rf "$iconset"; mkdir -p "$iconset"; '
+               'cp "${SRCROOT}"/App/Assets.xcassets/AppIcon.appiconset/icon_*.png "$iconset"/; '
+               'iconutil -c icns "$iconset" -o "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AppIcon.icns"')
+
 products = []
 sources = {}
 WIDGET_FILES = ['Widget/QuotaWidget.swift', 'Widget/AIQuotaWidget.swift', 'Widget/OrbitTheme.swift', 'Widget/OrbitViews.swift',
@@ -51,12 +56,12 @@ for name, product, kind, files, extra in [
     ('AIQuotaWidget', 'Arcmeter.app', 'application', ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/App-Info.plist', PRODUCT_NAME='Arcmeter', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget',
           ENABLE_APP_SANDBOX='NO', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon',
-          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='6')),
+          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='7')),
     ('QuotaWidgetExtension', 'QuotaWidgetExtension.appex', 'app-extension', WIDGET_FILES + ['Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/Widget-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.widget',
           CODE_SIGN_ENTITLEMENTS='Config/Widget.entitlements', ENABLE_APP_SANDBOX='YES',
           APPLICATION_EXTENSION_API_ONLY='YES', SKIP_INSTALL='YES',
-          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='6')),
+          MARKETING_VERSION='1.1', CURRENT_PROJECT_VERSION='7')),
     ('QuotaCoreTests', 'QuotaCoreTests.xctest', 'bundle.unit-test', ['QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift'],
      dict(GENERATE_INFOPLIST_FILE='YES', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.tests')),
 ]:
@@ -74,6 +79,8 @@ for name, product, kind, files, extra in [
     phases = [source_phase, framework_phase, resource_phase]
     dependencies = []
     if name == 'AIQuotaWidget':
+        phases.append(add('AppIconIcnsPhase', 'PBXShellScriptBuildPhase', buildActionMask='2147483647', files=[], inputPaths=[], outputPaths=[],
+                          runOnlyForDeploymentPostprocessing='0', shellPath='/bin/sh', shellScript=ICON_SCRIPT, showEnvVarsInLog='0', alwaysOutOfDate='1', name='Build full AppIcon.icns'))
         embed = add('EmbedExtensionFile', 'PBXBuildFile', fileRef=ref('QuotaWidgetExtensionProduct'), settings={'ATTRIBUTES':['RemoveHeadersOnCopy']})
         phases.append(add('EmbedExtensions', 'PBXCopyFilesBuildPhase', buildActionMask='2147483647', dstPath='', dstSubfolderSpec='13', files=[embed], name='Embed App Extensions', runOnlyForDeploymentPostprocessing='0'))
         proxy = add('ExtensionProxy', 'PBXContainerItemProxy', containerPortal=ref('Project'), proxyType='1', remoteGlobalIDString=ref('QuotaWidgetExtensionTarget'), remoteInfo='QuotaWidgetExtension')

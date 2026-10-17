@@ -156,6 +156,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = "0";
 		};
+		3B1BC6B0286921B301124E04 = {
+			isa = "PBXShellScriptBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+			shellPath = "/bin/sh";
+			shellScript = "set -eu; iconset=\"${TARGET_TEMP_DIR}/AppIcon.iconset\"; rm -rf \"$iconset\"; mkdir -p \"$iconset\"; cp \"${SRCROOT}\"/App/Assets.xcassets/AppIcon.appiconset/icon_*.png \"$iconset\"/; iconutil -c icns \"$iconset\" -o \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AppIcon.icns\"";
+			showEnvVarsInLog = "0";
+			alwaysOutOfDate = "1";
+			name = "Build full AppIcon.icns";
+		};
 		23F2BC07A75D3A635DFE41DD = {
 			isa = "PBXBuildFile";
 			fileRef = A3337A30D39351F3431320A0;
@@ -207,7 +223,7 @@
 				ENABLE_APP_SANDBOX = "NO";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "6";
+				CURRENT_PROJECT_VERSION = "7";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				ENABLE_TESTABILITY = "YES";
 				DEBUG_INFORMATION_FORMAT = "dwarf";
@@ -234,7 +250,7 @@
 				ENABLE_APP_SANDBOX = "NO";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "6";
+				CURRENT_PROJECT_VERSION = "7";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
@@ -256,6 +272,7 @@
 				27C05D586A1125B680248192,
 				F9DFB9E2EAEA9DE03E74741F,
 				6C253FFAB572448E5529127E,
+				3B1BC6B0286921B301124E04,
 				6D1D40D9616D7E90F1E634C7,
 			);
 			buildRules = (
@@ -374,7 +391,7 @@
 				APPLICATION_EXTENSION_API_ONLY = "YES";
 				SKIP_INSTALL = "YES";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "6";
+				CURRENT_PROJECT_VERSION = "7";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				ENABLE_TESTABILITY = "YES";
 				DEBUG_INFORMATION_FORMAT = "dwarf";
@@ -403,7 +420,7 @@
 				APPLICATION_EXTENSION_API_ONLY = "YES";
 				SKIP_INSTALL = "YES";
 				MARKETING_VERSION = "1.1";
-				CURRENT_PROJECT_VERSION = "6";
+				CURRENT_PROJECT_VERSION = "7";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};

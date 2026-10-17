@@ -26,7 +26,7 @@ The shared app scheme builds and embeds the widget extension and runs the QuotaC
 
 Open `AIQuotaWidget.xcodeproj` in Xcode to edit or run. The checked-in project can be regenerated with `python3 Scripts/generate-project.py`, using only the Python standard library. The built host app is `DerivedData/Build/Products/Debug/Arcmeter.app`. Every shipped UI change must bump `CURRENT_PROJECT_VERSION` for both the app and the widget extension (set in `Scripts/generate-project.py`), or the widget gallery keeps its cached descriptors.
 
-The app icon is the L9 mark in `Design/AppIcon/L9.png`, placed on a macOS icon-grid squircle. `Scripts/generate-app-icon.sh` regenerates the sizes in `App/Assets.xcassets/AppIcon.appiconset` (it uses the Swift compiler and `sips`).
+The app icon is the L9 mark in `Design/AppIcon/L9.png`, scaled onto a full-bleed black square with no rounded corners or padding so macOS applies its own mask. `Scripts/generate-app-icon.sh` regenerates the sizes in `App/Assets.xcassets/AppIcon.appiconset` (it uses the Swift compiler and `sips`). The app's "Build full AppIcon.icns" build phase then rebuilds `Resources/AppIcon.icns` from that set with `iconutil`, because the asset compiler writes only four sizes into the legacy file.
 
 ## Run and add to the desktop
 
