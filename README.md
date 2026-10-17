@@ -66,3 +66,7 @@ The directory is created with user-only permissions; the file is user-readable a
 The decoder consumes schema version 5's `quotaSemantics.effectiveAvailability` and `runway` data (`exhaustion[]` is quota-axi's human-readable output rendering). It respects scope status, source freshness, and duplicate window IDs. Both window values come from that scope's `boundedBy` windows; agy Gemini and agy Claude/GPT never share each other's meters. Duplicate windows use the tightest reading and its reset. Untrusted or missing windows show a dash, never a fabricated percentage. Provider-side stale window values remain labeled stale. Old snapshots remain readable until the first refresh supplies both windows. Unknown quota-axi schema versions fail visibly instead of guessing percentages. The decoder still carries quota-axi's `runway` fields, but no layout displays them. Percentages describe remaining quota, not quota used.
 
 There is no menu-bar component, remote service, telemetry, notification permission, or launch-at-login configuration.
+
+## License
+
+MIT - see [LICENSE](LICENSE).
