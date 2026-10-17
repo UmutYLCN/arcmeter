@@ -38,8 +38,10 @@ def configs(name, base):
 
 products = []
 sources = {}
-for path in ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift',
-             'Widget/QuotaWidget.swift', 'Widget/AIQuotaWidget.swift', 'QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift']:
+WIDGET_FILES = ['Widget/QuotaWidget.swift', 'Widget/AIQuotaWidget.swift', 'Widget/OrbitTheme.swift', 'Widget/OrbitViews.swift',
+                'Widget/LedgerView.swift', 'Widget/ProviderMarks.swift', 'Widget/StateIcons.swift', 'Widget/QuotaIntents.swift']
+for path in ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'] + WIDGET_FILES + [
+             'QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift']:
     sources[path] = add(path, 'PBXFileReference', lastKnownFileType='sourcecode.swift', path=path, sourceTree='<group>')
 fixture = add('Fixtures', 'PBXFileReference', lastKnownFileType='folder', path='QuotaCore/Tests/QuotaCoreTests/Fixtures', sourceTree='<group>')
 package = add('Package', 'XCLocalSwiftPackageReference', relativePath='QuotaCore')
@@ -47,11 +49,11 @@ package = add('Package', 'XCLocalSwiftPackageReference', relativePath='QuotaCore
 for name, product, kind, files, extra in [
     ('AIQuotaWidget', 'AIQuotaWidget.app', 'application', ['App/AIQuotaWidgetApp.swift', 'App/QuotaReader.swift', 'Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/App-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget', ENABLE_APP_SANDBOX='NO')),
-    ('QuotaWidgetExtension', 'QuotaWidgetExtension.appex', 'app-extension', ['Widget/QuotaWidget.swift', 'Widget/AIQuotaWidget.swift', 'Shared/SnapshotStore.swift'],
+    ('QuotaWidgetExtension', 'QuotaWidgetExtension.appex', 'app-extension', WIDGET_FILES + ['Shared/SnapshotStore.swift'],
      dict(INFOPLIST_FILE='Config/Widget-Info.plist', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.widget',
           CODE_SIGN_ENTITLEMENTS='Config/Widget.entitlements', ENABLE_APP_SANDBOX='YES',
           APPLICATION_EXTENSION_API_ONLY='YES', SKIP_INSTALL='YES')),
-    ('QuotaCoreTests', 'QuotaCoreTests.xctest', 'bundle.unit-test', ['QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift'],
+    ('QuotaCoreTests', 'QuotaCoreTests.xctest', 'bundle.unit-test', ['QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift', 'QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift'],
      dict(GENERATE_INFOPLIST_FILE='YES', PRODUCT_BUNDLE_IDENTIFIER='local.ai-quota-widget.tests')),
 ]:
     product_ref = add(name+'Product', 'PBXFileReference', explicitFileType={'application':'wrapper.application','app-extension':'wrapper.app-extension','bundle.unit-test':'wrapper.cfbundle'}[kind],

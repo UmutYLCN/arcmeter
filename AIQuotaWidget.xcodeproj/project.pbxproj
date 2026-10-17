@@ -35,10 +35,52 @@
 			path = "Widget/AIQuotaWidget.swift";
 			sourceTree = "<group>";
 		};
+		103DFA0E6A997C5C9D643497 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/OrbitTheme.swift";
+			sourceTree = "<group>";
+		};
+		AF58946035592F4B4BBD0489 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/OrbitViews.swift";
+			sourceTree = "<group>";
+		};
+		E80A626EB86BFF68C3B83FDA = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/LedgerView.swift";
+			sourceTree = "<group>";
+		};
+		95CD5055FCB5635E6AA2DBF5 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/ProviderMarks.swift";
+			sourceTree = "<group>";
+		};
+		2F9F311154F0D40A58FF9225 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/StateIcons.swift";
+			sourceTree = "<group>";
+		};
+		C8D333DB77780A5F4A52B812 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Widget/QuotaIntents.swift";
+			sourceTree = "<group>";
+		};
 		FA0656FB53880C42D350790D = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
 			path = "QuotaCore/Tests/QuotaCoreTests/QuotaDecoderTests.swift";
+			sourceTree = "<group>";
+		};
+		D31E73F2D7BBC691EEEC4401 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "QuotaCore/Tests/QuotaCoreTests/DisplayTests.swift";
 			sourceTree = "<group>";
 		};
 		6FC1F09BE441258BA67129D1 = {
@@ -226,6 +268,30 @@
 			isa = "PBXBuildFile";
 			fileRef = 25AB79D2F798D2A5AFF47FA0;
 		};
+		3967D953813D88D17BA06BA7 = {
+			isa = "PBXBuildFile";
+			fileRef = 103DFA0E6A997C5C9D643497;
+		};
+		858BF9C743E7BCC037E54C9A = {
+			isa = "PBXBuildFile";
+			fileRef = AF58946035592F4B4BBD0489;
+		};
+		6B60E25424206E5A05AF5FFE = {
+			isa = "PBXBuildFile";
+			fileRef = E80A626EB86BFF68C3B83FDA;
+		};
+		E31C316C1ECA2BDC8AE6CF9C = {
+			isa = "PBXBuildFile";
+			fileRef = 95CD5055FCB5635E6AA2DBF5;
+		};
+		F66BDDCA6BE2DBB572C69F33 = {
+			isa = "PBXBuildFile";
+			fileRef = 2F9F311154F0D40A58FF9225;
+		};
+		041F7EFCDF4AED734BFBD3ED = {
+			isa = "PBXBuildFile";
+			fileRef = C8D333DB77780A5F4A52B812;
+		};
 		BE2B2A7006DA84CFDB006103 = {
 			isa = "PBXBuildFile";
 			fileRef = 78CC7F1C8D4836FE56CE13F3;
@@ -236,6 +302,12 @@
 			files = (
 				9CDA91F6E81DDC25462D6850,
 				DE8CEA4629241ABD7508444C,
+				3967D953813D88D17BA06BA7,
+				858BF9C743E7BCC037E54C9A,
+				6B60E25424206E5A05AF5FFE,
+				E31C316C1ECA2BDC8AE6CF9C,
+				F66BDDCA6BE2DBB572C69F33,
+				041F7EFCDF4AED734BFBD3ED,
 				BE2B2A7006DA84CFDB006103,
 			);
 			runOnlyForDeploymentPostprocessing = "0";
@@ -355,11 +427,16 @@
 			isa = "PBXBuildFile";
 			fileRef = FA0656FB53880C42D350790D;
 		};
+		0C2F23DB84237BFA04B95A39 = {
+			isa = "PBXBuildFile";
+			fileRef = D31E73F2D7BBC691EEEC4401;
+		};
 		958D3F09ECF9A53A32473F3D = {
 			isa = "PBXSourcesBuildPhase";
 			buildActionMask = "2147483647";
 			files = (
 				8AAF0A79B81240EFE504E69E,
+				0C2F23DB84237BFA04B95A39,
 			);
 			runOnlyForDeploymentPostprocessing = "0";
 		};
@@ -481,7 +558,14 @@
 				78CC7F1C8D4836FE56CE13F3,
 				AF45EE62C1F6527E566D3348,
 				25AB79D2F798D2A5AFF47FA0,
+				103DFA0E6A997C5C9D643497,
+				AF58946035592F4B4BBD0489,
+				E80A626EB86BFF68C3B83FDA,
+				95CD5055FCB5635E6AA2DBF5,
+				2F9F311154F0D40A58FF9225,
+				C8D333DB77780A5F4A52B812,
 				FA0656FB53880C42D350790D,
+				D31E73F2D7BBC691EEEC4401,
 				6FC1F09BE441258BA67129D1,
 				4EDC8BFAFC6BD936B849F38C,
 			);

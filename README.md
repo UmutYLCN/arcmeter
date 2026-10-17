@@ -1,6 +1,13 @@
 # AI Quota Widget
 
-A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`). Both small and medium widgets show Claude, Codex, agy Gemini, and agy Claude/GPT, with separate **5-hour** and **weekly** percentages, usage bars, and relative reset times for every scope. An asterisk marks the limiting window. A projected run-out time appears in orange as **Out ~…** when quota-axi reports one; the host also shows its calendar date. **Lasts to reset** means the reported pace reaches the next reset, and **No forecast** means quota-axi cannot project exhaustion.
+A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`), in the dark **Orbit** design. The 5-hour window is the primary reading, drawn as a ring (half-circle on the small tile) with the remaining percentage inside; the weekly window sits below as `7d 33%` over ten thin segments, with its reset countdown. A `*` and amber segments mark a limiting window that is running low (50% or less).
+
+- **Small:** one provider per tile. Tap `›` to advance Claude, Codex, agy Gemini, agy Claude/GPT. WidgetKit has no swipe, so this is an interactive AppIntent button (macOS 14+); the current index is kept in the widget extension's own preferences.
+- **Medium:** all four providers in a row, each with a 5h ring.
+- **Large:** the same four providers in a 2x2 grid.
+- **Orbit Ledger (separate large widget):** one row per provider with the 5h and 7d bars side by side.
+
+Provider marks (Claude, Codex, Gemini, Antigravity) are vector shapes drawn in `Widget/ProviderMarks.swift`; the Antigravity mark follows the official full-color icon. Stale data shows a clock badge, `STALE`, and `Updated N min ago`; a missing snapshot shows dashed rings with a crossed-out cloud and **No data**; a Claude authorization problem shows a lock and **Authorization needed**. The widget does not show run-out forecasts.
 
 Requires macOS 15+, Xcode 16+ (tested with Xcode 26.3), and an existing `/usr/local/bin/quota-axi` installation. No package downloads, XcodeGen, Apple ID, or paid developer account are required. The project uses local ad-hoc signing; leave Signing Certificate set to **Sign to Run Locally** and do not select a development team.
 
@@ -27,7 +34,7 @@ open DerivedData/Build/Products/Debug/AIQuotaWidget.app
 
 1. Let the first refresh finish. All four quota rows should appear in the host app.
 2. Control-click the desktop and choose **Edit Widgets**.
-3. Search for **AI Quota Widget**, then drag its small or medium widget onto the desktop.
+3. Search for **AI Quota Orbit** (small, medium, or large) or **AI Quota Orbit Ledger** (large), then drag it onto the desktop.
 4. Keep the host app running. It refreshes immediately on launch and every five minutes; **Refresh** requests a new read. Clicking the widget opens the host app.
 
 If the gallery has not discovered the app, run it once from Xcode, close and reopen the gallery, and search again. For a stable installed location, copy the built app to your user Applications folder and launch that copy. Replacing a build can require removing and re-adding the widget.
@@ -38,7 +45,7 @@ Claude reads always include `--allow-keychain-prompt`. If Claude reports **autho
 
 ## Additional local checks
 
-After building, `Scripts/preview.sh` renders both widget sizes with the captured reading, stale data, missing data, and Claude authorization required to `DerivedData/Previews/`.
+After building, `Scripts/preview.sh` renders the small (all four provider frames), medium, large, and ledger layouts with the captured reading, stale data, missing data, and Claude authorization required to `DerivedData/Previews/`.
 
 After launching the host and waiting for its first successful refresh, `Scripts/verify-sandbox.sh` builds an ad-hoc signed sandbox probe with the extension's exact entitlements. It checks that the shared snapshot contains all three providers, can be read, and cannot be opened for writing. This does not place a widget on the desktop; add the widget from the gallery to complete the interactive check.
 
@@ -54,6 +61,6 @@ The host atomically writes a compact, account-free snapshot to:
 
 The directory is created with user-only permissions; the file is user-readable and writable only. The sandboxed widget has a read-only [home-relative temporary exception](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html) for that exact file in `Config/Widget.entitlements`. It resolves the real home through `getpwuid`, rather than using the sandbox container home. There is no App Group or provisioning profile. This is a local development arrangement; App Store distribution would require revisiting the sharing and signing setup.
 
-The decoder consumes schema version 5's `quotaSemantics.effectiveAvailability` and `runway` data (`exhaustion[]` is quota-axi's human-readable output rendering). It respects scope status, source freshness, and duplicate window IDs. Both window values come from that scope's `boundedBy` windows; agy Gemini and agy Claude/GPT never share each other's meters. Duplicate windows use the tightest reading and its reset. Untrusted or missing windows show a dash, never a fabricated percentage. Provider-side stale window values remain labeled stale and never display a current exhaustion forecast. Old snapshots remain readable until the first refresh supplies both windows. Unknown quota-axi schema versions fail visibly instead of guessing percentages. “Out” is a quota-axi projection, not a guarantee; the widget does not calculate its own usage forecast. Percentages describe remaining quota, not quota used.
+The decoder consumes schema version 5's `quotaSemantics.effectiveAvailability` and `runway` data (`exhaustion[]` is quota-axi's human-readable output rendering). It respects scope status, source freshness, and duplicate window IDs. Both window values come from that scope's `boundedBy` windows; agy Gemini and agy Claude/GPT never share each other's meters. Duplicate windows use the tightest reading and its reset. Untrusted or missing windows show a dash, never a fabricated percentage. Provider-side stale window values remain labeled stale. Old snapshots remain readable until the first refresh supplies both windows. Unknown quota-axi schema versions fail visibly instead of guessing percentages. The decoder still carries quota-axi's `runway` fields, but no layout displays them. Percentages describe remaining quota, not quota used.
 
 There is no menu-bar component, remote service, telemetry, notification permission, or launch-at-login configuration.

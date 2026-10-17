@@ -114,22 +114,6 @@ private struct ContentView: View {
                                         }.frame(maxWidth: .infinity, alignment: .leading)
                                     }
                                 }
-                                HStack(spacing: 3) {
-                                    if row.isStale(at: context.date) {
-                                        Text("Stale reading · refresh for a current forecast")
-                                    } else if row.runwayStatus == "exhausted_now" {
-                                        Text("Quota exhausted now")
-                                    } else if let runout = row.projectedExhaustedAt {
-                                        Text("At this pace: runs out")
-                                        Text(runout, style: .relative)
-                                        Text("·")
-                                        Text(runout, format: .dateTime.month(.abbreviated).day().hour().minute())
-                                    } else if row.runwayStatus == "through_reset" {
-                                        Text("At this pace: lasts until the next reset")
-                                    } else {
-                                        Text("Exhaustion forecast unavailable")
-                                    }
-                                }.font(.caption).foregroundStyle(row.runsOutBeforeReset ? .orange : .secondary)
                             }
                         }
                     }
