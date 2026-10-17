@@ -13,8 +13,6 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
     public let name: String
     public let fiveHour: Double?
     public let weekly: Double?
-    public let fiveHourLimiting: Bool
-    public let weeklyLimiting: Bool
     public let fiveHourReset: Date?
     public let weeklyReset: Date?
     public let availability: Availability
@@ -28,8 +26,6 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
         mark = Self.mark(provider: row.provider, scope: row.scope)
         fiveHour = five?.percentRemaining
         weekly = week?.percentRemaining
-        fiveHourLimiting = five?.isLimiting ?? false
-        weeklyLimiting = week?.isLimiting ?? false
         fiveHourReset = five?.resetsAt
         weeklyReset = week?.resetsAt
         availability = row.status == "authorization needed" ? .authorizationNeeded
@@ -43,18 +39,11 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
         self.mark = mark
         fiveHour = nil
         weekly = nil
-        fiveHourLimiting = false
-        weeklyLimiting = false
         fiveHourReset = nil
         weeklyReset = nil
         availability = .unavailable
         isStale = false
     }
-
-    /// Only a limiting window that is running low gets the `*` and amber emphasis.
-    public static let lowThreshold = 50.0
-    public var fiveHourIsLow: Bool { fiveHourLimiting && (fiveHour ?? 100) <= Self.lowThreshold }
-    public var weeklyIsLow: Bool { weeklyLimiting && (weekly ?? 100) <= Self.lowThreshold }
 
     /// Shown while no snapshot exists, so the layout never invents percentages.
     public static let placeholders = [

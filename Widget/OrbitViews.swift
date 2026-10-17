@@ -50,7 +50,7 @@ struct OrbitFooter: View {
     }
 }
 
-/// The 5h caption under the percentage: time left in that window ("2h 14m*"), rendered at the entry's date.
+/// The 5h caption under the percentage: time left in that window ("2h 14m"), rendered at the entry's date.
 struct FiveHourCaption: View {
     let tile: ProviderTile
     let now: Date
@@ -58,7 +58,7 @@ struct FiveHourCaption: View {
 
     var body: some View {
         let left = ResetCountdown.remaining(until: tile.fiveHourReset, now: now) ?? "—"
-        Text(left + (tile.fiveHourIsLow ? "*" : ""))
+        Text(left)
             .font(.system(size: size)).foregroundStyle(OrbitTheme.muted)
     }
 }
@@ -160,7 +160,7 @@ struct OrbitWeeklyBar: View {
         let reset = ResetCountdown.text(until: tile.weeklyReset, now: entry.date)
         VStack(spacing: metrics.spacing) {
             HStack {
-                Text("7d" + (tile.weeklyIsLow ? "*" : "")).foregroundStyle(OrbitTheme.muted)
+                Text("7d").foregroundStyle(OrbitTheme.muted)
                 Spacer(minLength: 0)
                 Text(tile.weekly.map { "\(PercentText.text($0))%" } ?? "—").fontWeight(.semibold)
                     .foregroundStyle(OrbitTheme.weekly)

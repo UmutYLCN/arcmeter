@@ -20,8 +20,6 @@ final class DisplayTests: XCTestCase {
         XCTAssertEqual(tiles.map(\.mark), [.claude, .codex, .gemini, .agy])
         XCTAssertEqual(tiles.map(\.fiveHour), [96, 100, 100, 100])
         XCTAssertEqual(tiles.map(\.weekly), [33, 84, 86, 100])
-        XCTAssertEqual(tiles.map(\.weeklyIsLow), [true, false, false, false])
-        XCTAssertTrue(tiles.allSatisfy { !$0.fiveHourIsLow })
         XCTAssertNotNil(tiles[0].weeklyReset)
         XCTAssertTrue(tiles.allSatisfy { $0.fiveHourReset != nil })
         XCTAssertEqual(ResetCountdown.remaining(until: tiles[0].fiveHourReset, now: snapshot.generatedAt), "4h 45m")

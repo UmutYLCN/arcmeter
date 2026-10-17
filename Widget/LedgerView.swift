@@ -30,22 +30,20 @@ struct LedgerLargeView: View {
                 }
             }
             HStack(alignment: .top, spacing: 16) {
-                window("5h", limiting: tile.fiveHourIsLow, percent: tile.fiveHour, reset: nil, tile: tile,
-                       valueSize: 28, weight: .semibold)
-                window("7d", limiting: tile.weeklyIsLow, percent: tile.weekly,
-                       reset: ResetCountdown.text(until: tile.weeklyReset, now: entry.date), tile: tile,
-                       valueSize: 19, weight: .medium)
+                window("5h", percent: tile.fiveHour, reset: nil, tile: tile, valueSize: 28, weight: .semibold)
+                window("7d", percent: tile.weekly, reset: ResetCountdown.text(until: tile.weeklyReset, now: entry.date),
+                       tile: tile, valueSize: 19, weight: .medium)
             }
         }
         .padding(.vertical, 8)
         .opacity(tile.isStale ? OrbitTheme.dimmed : 1)
     }
 
-    private func window(_ label: String, limiting: Bool, percent: Double?, reset: String?, tile: ProviderTile,
+    private func window(_ label: String, percent: Double?, reset: String?, tile: ProviderTile,
                         valueSize: CGFloat, weight: Font.Weight) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                Text(label + (limiting ? "*" : "")).font(.system(size: 11)).foregroundStyle(OrbitTheme.muted)
+                Text(label).font(.system(size: 11)).foregroundStyle(OrbitTheme.muted)
                 Text(percent.map { "\(PercentText.text($0))%" } ?? "—")
                     .font(.system(size: valueSize, weight: weight)).monospacedDigit()
                     .foregroundStyle(label == "5h" ? OrbitTheme.text : OrbitTheme.weekly)
