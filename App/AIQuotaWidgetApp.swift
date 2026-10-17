@@ -58,10 +58,12 @@ struct AIQuotaWidgetApp: App {
         model.start()
     }
     var body: some Scene {
-        WindowGroup("Arcmeter") {
+        // A single Window scene: every widget tap routes to this one window instead of opening another.
+        Window("Arcmeter", id: "main") {
             ContentView(model: model)
                 .onOpenURL { _ in NSApp.activate(ignoringOtherApps: true) }
         }
+        .handlesExternalEvents(matching: ["*"])
         .defaultSize(width: 600, height: 630)
         .windowResizability(.contentSize)
     }

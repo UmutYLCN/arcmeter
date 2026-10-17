@@ -23,6 +23,8 @@ final class DisplayTests: XCTestCase {
         XCTAssertEqual(tiles.map(\.weeklyIsLow), [true, false, false, false])
         XCTAssertTrue(tiles.allSatisfy { !$0.fiveHourIsLow })
         XCTAssertNotNil(tiles[0].weeklyReset)
+        XCTAssertTrue(tiles.allSatisfy { $0.fiveHourReset != nil })
+        XCTAssertEqual(ResetCountdown.remaining(until: tiles[0].fiveHourReset, now: snapshot.generatedAt), "4h 45m")
         XCTAssertTrue(tiles.allSatisfy { $0.availability == .measured && !$0.isStale })
     }
 
@@ -42,7 +44,7 @@ final class DisplayTests: XCTestCase {
 
         let placeholders = ProviderTile.tiles(for: nil, at: .now)
         XCTAssertEqual(placeholders.count, 4)
-        XCTAssertTrue(placeholders.allSatisfy { $0.fiveHour == nil && $0.weekly == nil && $0.availability == .unavailable })
+        XCTAssertTrue(placeholders.allSatisfy { $0.fiveHour == nil && $0.fiveHourReset == nil && $0.weekly == nil && $0.availability == .unavailable })
 
         var report = try XCTUnwrap(JSONSerialization.jsonObject(with: fixture()) as? [String: Any])
         var providers = try XCTUnwrap(report["providers"] as? [[String: Any]])
@@ -111,5 +113,15 @@ final class DisplayTests: XCTestCase {
         XCTAssertEqual(text(30), "<1m")
         XCTAssertEqual(text(-5), "due")
         XCTAssertNil(text(nil))
+    }
+
+    func testFiveHourCountdownShowsNilWhenUnknownOrPassed() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        func text(_ seconds: Double?) -> String? { ResetCountdown.remaining(until: seconds.map { now.addingTimeInterval($0) }, now: now) }
+        XCTAssertEqual(text(2 * 3600 + 14 * 60), "2h 14m")
+        XCTAssertEqual(text(47 * 60), "47m")
+        XCTAssertNil(text(nil))
+        XCTAssertNil(text(0))
+        XCTAssertNil(text(-5))
     }
 }

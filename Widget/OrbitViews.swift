@@ -28,8 +28,7 @@ struct OrbitRing: View {
                     Text(PercentText.text(tile.fiveHour)).font(.system(size: numberSize, weight: .medium)).monospacedDigit()
                     if tile.fiveHour != nil { Text("%").font(.system(size: numberSize * 0.4)) }
                 }
-                Text("5h" + (tile.fiveHourIsLow ? "*" : "")).font(.system(size: max(numberSize * 0.36, 7)))
-                    .foregroundStyle(OrbitTheme.muted)
+                FiveHourCaption(tile: tile, size: max(numberSize * 0.36, 7))
             }.foregroundStyle(OrbitTheme.text)
             }
         }
@@ -47,6 +46,20 @@ struct OrbitFooter: View {
         if entry.snapshot == nil {
             Text("No data · open app to refresh").font(.system(size: 9)).foregroundStyle(OrbitTheme.muted).lineLimit(1)
         }
+    }
+}
+
+/// The 5h caption under the percentage: time left in that window ("2h 14m*"), redrawn every minute.
+struct FiveHourCaption: View {
+    let tile: ProviderTile
+    let size: CGFloat
+
+    var body: some View {
+        TimelineView(.everyMinute) { context in
+            let left = ResetCountdown.remaining(until: tile.fiveHourReset, now: context.date) ?? "—"
+            Text(left + (tile.fiveHourIsLow ? "*" : ""))
+        }
+        .font(.system(size: size)).foregroundStyle(OrbitTheme.muted)
     }
 }
 
@@ -102,7 +115,7 @@ struct OrbitHalfGauge: View {
                     Text(PercentText.text(tile.fiveHour)).font(.system(size: 30, weight: .medium)).monospacedDigit()
                     if tile.fiveHour != nil { Text("%").font(.system(size: 11)) }
                 }
-                Text("5h" + (tile.fiveHourIsLow ? "*" : "")).font(.system(size: 9)).foregroundStyle(OrbitTheme.muted)
+                FiveHourCaption(tile: tile, size: 9)
             }
             .foregroundStyle(OrbitTheme.text)
             .padding(.bottom, -7)

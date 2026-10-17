@@ -15,6 +15,7 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
     public let weekly: Double?
     public let fiveHourLimiting: Bool
     public let weeklyLimiting: Bool
+    public let fiveHourReset: Date?
     public let weeklyReset: Date?
     public let availability: Availability
     public let isStale: Bool
@@ -29,6 +30,7 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
         weekly = week?.percentRemaining
         fiveHourLimiting = five?.isLimiting ?? false
         weeklyLimiting = week?.isLimiting ?? false
+        fiveHourReset = five?.resetsAt
         weeklyReset = week?.resetsAt
         availability = row.status == "authorization needed" ? .authorizationNeeded
             : (fiveHour == nil && weekly == nil ? .unavailable : .measured)
@@ -43,6 +45,7 @@ public struct ProviderTile: Equatable, Sendable, Identifiable {
         weekly = nil
         fiveHourLimiting = false
         weeklyLimiting = false
+        fiveHourReset = nil
         weeklyReset = nil
         availability = .unavailable
         isStale = false
@@ -135,6 +138,12 @@ public enum ResetCountdown {
         if days > 0 { return hours > 0 ? "\(days)d \(hours)h" : "\(days)d" }
         if hours > 0 { return mins > 0 ? "\(hours)h \(mins)m" : "\(hours)h" }
         return "\(mins)m"
+    }
+
+    /// Time left in the 5-hour window, "2h 14m" or "47m"; nil when the reset is unknown or already passed.
+    public static func remaining(until date: Date?, now: Date) -> String? {
+        guard let date, date > now else { return nil }
+        return text(until: date, now: now)
     }
 }
 
