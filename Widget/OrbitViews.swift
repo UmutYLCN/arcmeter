@@ -193,7 +193,7 @@ struct OrbitSmallView: View {
                             .frame(width: 28, height: 28, alignment: .trailing).contentShape(Rectangle())
                     }.buttonStyle(.plain).accessibilityLabel("Next provider")
                 }
-            }.frame(height: 20)
+            }.frame(height: 20).offset(y: -5)
             Spacer(minLength: 0)
             OrbitHalfGauge(tile: tile)
             Spacer(minLength: 0)
@@ -268,7 +268,7 @@ struct OrbitRowView: View {
 
         static let medium = Layout(tileWidth: 112, spacing: 10, gap: 1, ring: 96, number: 24,
                                    logo: 15, name: 10.5, barWidth: 104,
-                                   weekly: .init(text: 12, spacing: 2, barHeight: 5.5, segmentGap: 1.5), height: 148, maxScale: 1.2)
+                                   weekly: .init(text: 12, spacing: 2, barHeight: 5.5, segmentGap: 1.5), height: 153, maxScale: 1.2)
     }
 
     let entry: QuotaEntry
@@ -285,7 +285,7 @@ struct OrbitRowView: View {
                                 ProviderLogo(mark: tile.mark, size: layout.logo)
                                 Text(tile.name).font(.system(size: layout.name, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
                                 StaleMark(tile: tile, size: layout.name - 1)
-                            }
+                            }.padding(.bottom, 5)
                             Spacer(minLength: layout.gap)
                             OrbitRing(tile: tile, size: layout.ring, numberSize: layout.number)
                             Spacer(minLength: layout.gap)
@@ -310,7 +310,7 @@ struct OrbitMediumView: View {
 /// The 2x2 grid is designed at its natural size and fitted to the content margins, so the four rings, percentages
 /// and weekly segments are as large as the widget allows and nothing is clipped.
 struct OrbitLargeView: View {
-    private static let design = CGSize(width: 300, height: 346)
+    private static let design = CGSize(width: 300, height: 356)
     let entry: QuotaEntry
 
     var body: some View {
@@ -325,7 +325,7 @@ struct OrbitLargeView: View {
                                         ProviderLogo(mark: tile.mark, size: 18)
                                         Text(tile.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
                                         StaleMark(tile: tile, size: 10)
-                                    }
+                                    }.padding(.bottom, 5)
                                     OrbitRing(tile: tile, size: 96, numberSize: 30)
                                     OrbitWeeklyBar(tile: tile, entry: entry,
                                                    metrics: .init(text: 12, spacing: 4, barHeight: 6, segmentGap: 2))
