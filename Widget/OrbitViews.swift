@@ -10,12 +10,12 @@ struct OrbitRing: View {
 
     var body: some View {
         let stroke = size * 0.08
-        let diameter = size * 0.84
+        let diameter = size * 0.9
         ZStack {
             if let icon = tile.emptyIcon {
                 Circle().stroke(OrbitTheme.track, style: StrokeStyle(lineWidth: stroke * 0.75, lineCap: .round, dash: [0.01, stroke * 1.6]))
                     .frame(width: diameter, height: diameter)
-                StateIcon(kind: icon, size: size * 0.34, color: icon == .lock ? OrbitTheme.stale : OrbitTheme.muted)
+                StateIcon(kind: icon, size: size * 0.34, color: OrbitTheme.muted)
             } else {
             Circle().stroke(OrbitTheme.track, lineWidth: stroke).frame(width: diameter, height: diameter)
             if RingGauge.fraction(tile.fiveHour) > 0 {
@@ -34,21 +34,19 @@ struct OrbitRing: View {
             }
         }
         .frame(width: size, height: size)
-        .opacity(tile.isStale ? 0.6 : 1)
-        .overlay(alignment: .topTrailing) {
-            if tile.isStale && tile.availability == .measured { StaleBadge(size: size * 0.3).offset(x: size * 0.04, y: -size * 0.02) }
-        }
+        .opacity(tile.isStale ? OrbitTheme.dimmed : 1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(tile.name) 5-hour: " + (tile.fiveHour.map { "\(Int($0.rounded())) percent remaining" } ?? "no data"))
     }
 }
 
-/// Only the empty state is spelled out; freshness shows as the per-provider clock badge.
+/// Only the empty state is spelled out; freshness shows as a small grey clock beside the provider name.
 struct OrbitFooter: View {
     let entry: QuotaEntry
     var body: some View {
-        Text(entry.snapshot == nil ? "No data · open app to refresh" : " ")
-            .font(.system(size: 8)).foregroundStyle(OrbitTheme.muted).lineLimit(1)
+        if entry.snapshot == nil {
+            Text("No data · open app to refresh").font(.system(size: 9)).foregroundStyle(OrbitTheme.muted).lineLimit(1)
+        }
     }
 }
 
@@ -74,7 +72,7 @@ struct OrbitHalfGauge: View {
             if let icon = tile.emptyIcon {
                 HalfArc().stroke(OrbitTheme.track, style: StrokeStyle(lineWidth: line * 0.7, lineCap: .round, dash: [0.01, 11]))
                     .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
-                StateIcon(kind: icon, size: 30, color: icon == .lock ? OrbitTheme.stale : OrbitTheme.muted).padding(.bottom, 6)
+                StateIcon(kind: icon, size: 30, color: OrbitTheme.muted).padding(.bottom, 6)
             } else {
             HalfArc().stroke(OrbitTheme.track, style: StrokeStyle(lineWidth: line, lineCap: .round))
                 .frame(width: radius * 2, height: radius).position(x: 58, y: 60 - radius / 2)
@@ -94,11 +92,9 @@ struct OrbitHalfGauge: View {
             .padding(.bottom, -7)
             }
         }
-        .frame(width: 116, height: 66)
-        .opacity(tile.isStale ? 0.6 : 1)
-        .overlay(alignment: .topTrailing) {
-            if tile.isStale && tile.availability == .measured { StaleBadge(size: 26).offset(x: 6, y: -4) }
-        }
+        .scaleEffect(1.06)
+        .frame(width: 124, height: 70)
+        .opacity(tile.isStale ? OrbitTheme.dimmed : 1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(tile.name) 5-hour: " + (tile.fiveHour.map { "\(Int($0.rounded())) percent remaining" } ?? "no data"))
     }
@@ -148,7 +144,7 @@ struct OrbitWeeklyBar: View {
                             height: metrics.barHeight, gap: metrics.segmentGap)
             Group {
                 if tile.availability == .authorizationNeeded {
-                    Text("Authorize").foregroundStyle(OrbitTheme.stale)
+                    Text("Authorize").foregroundStyle(OrbitTheme.text)
                 } else if let reset {
                     Text("↻ " + reset)
                 } else {
@@ -156,7 +152,7 @@ struct OrbitWeeklyBar: View {
                 }
             }.font(.system(size: metrics.text - 1)).foregroundStyle(OrbitTheme.muted).lineLimit(1)
         }
-        .opacity(tile.isStale ? 0.6 : 1)
+        .opacity(tile.isStale ? OrbitTheme.dimmed : 1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(tile.name) weekly: "
             + (tile.weekly.map { "\(Int($0.rounded())) percent remaining" } ?? "no data"))
@@ -179,10 +175,11 @@ struct OrbitSmallView: View {
                 } else {
                     ProviderLogo(mark: tile.mark, size: 17)
                     Text(tile.name).font(.system(size: 10, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+                    StaleMark(tile: tile, size: 9)
                     Spacer(minLength: 0)
                     Button(intent: NextProviderIntent()) {
                         Text("›").font(.system(size: 25)).foregroundStyle(Color.white.opacity(0.7))
-                            .frame(width: 28, height: 28).contentShape(Rectangle())
+                            .frame(width: 28, height: 28, alignment: .trailing).contentShape(Rectangle())
                     }.buttonStyle(.plain).accessibilityLabel("Next provider")
                 }
             }.frame(height: 20)
@@ -205,7 +202,7 @@ extension OrbitSmallView {
         let authorize = tile.availability == .authorizationNeeded
         return VStack(spacing: 2) {
             Text(authorize ? "Authorization needed" : (entry.snapshot == nil ? "No data" : "No reading"))
-                .fontWeight(.semibold).foregroundStyle(authorize ? OrbitTheme.stale : OrbitTheme.text)
+                .fontWeight(.semibold).foregroundStyle(OrbitTheme.text)
             Text(authorize ? "Open app to authorize" : "Open app to refresh").foregroundStyle(OrbitTheme.muted)
         }.font(.system(size: 10)).multilineTextAlignment(.center).frame(height: 31)
     }
@@ -216,23 +213,25 @@ struct OrbitMediumView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .top, spacing: 6) {
                 ForEach(entry.tiles) { tile in
-                    VStack(spacing: 3) {
-                        VStack(spacing: 2) {
-                            ProviderLogo(mark: tile.mark, size: 13)
-                            Text(tile.name).font(.system(size: 8, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                    VStack(spacing: 0) {
+                        HStack(spacing: 3) {
+                            ProviderLogo(mark: tile.mark, size: 14)
+                            Text(tile.name).font(.system(size: 9, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                            StaleMark(tile: tile, size: 8)
                         }
-                        OrbitRing(tile: tile, size: 58, numberSize: 13.5)
+                        Spacer(minLength: 2)
+                        OrbitRing(tile: tile, size: 82, numberSize: 20)
+                        Spacer(minLength: 2)
                         OrbitWeeklyBar(tile: tile, entry: entry,
-                                       metrics: .init(text: 8, spacing: 2, barHeight: 4, segmentGap: 1))
+                                       metrics: .init(text: 11, spacing: 3, barHeight: 5, segmentGap: 1.5))
                     }.frame(maxWidth: .infinity)
                 }
             }
-            Spacer(minLength: 0)
-            OrbitFooter(entry: entry).frame(maxWidth: .infinity, alignment: .trailing).frame(height: 10)
+            OrbitFooter(entry: entry).padding(.top, 4)
         }
-        .padding(.horizontal, 12).padding(.top, 12).padding(.bottom, 8).foregroundStyle(OrbitTheme.text)
+        .padding(.horizontal, 10).padding(.vertical, 10).foregroundStyle(OrbitTheme.text)
     }
 }
 
@@ -240,27 +239,28 @@ struct OrbitLargeView: View {
     let entry: QuotaEntry
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Grid(horizontalSpacing: 28, verticalSpacing: 14) {
+        VStack(spacing: 0) {
+            Grid(horizontalSpacing: 20, verticalSpacing: 10) {
                 ForEach(0..<2, id: \.self) { row in
                     GridRow {
                         ForEach(entry.tiles.dropFirst(row * 2).prefix(2)) { tile in
                             VStack(spacing: 8) {
                                 HStack(spacing: 6) {
-                                    ProviderLogo(mark: tile.mark, size: 17)
-                                    Text(tile.name).font(.system(size: 12, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+                                    ProviderLogo(mark: tile.mark, size: 18)
+                                    Text(tile.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+                                    StaleMark(tile: tile, size: 10)
                                 }
-                                OrbitRing(tile: tile, size: 84, numberSize: 25)
+                                OrbitRing(tile: tile, size: 96, numberSize: 29)
                                 OrbitWeeklyBar(tile: tile, entry: entry,
-                                               metrics: .init(text: 10, spacing: 4, barHeight: 5, segmentGap: 2))
-                                    .frame(width: 116)
-                            }.frame(maxWidth: .infinity)
+                                               metrics: .init(text: 11, spacing: 4, barHeight: 6, segmentGap: 2))
+                                    .frame(width: 136)
+                            }.frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                     }
                 }
-            }.padding(.bottom, 12)
-            OrbitFooter(entry: entry)
+            }
+            OrbitFooter(entry: entry).padding(.top, 4)
         }
-        .padding(24).foregroundStyle(OrbitTheme.text)
+        .padding(.horizontal, 20).padding(.vertical, 18).foregroundStyle(OrbitTheme.text)
     }
 }

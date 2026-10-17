@@ -48,14 +48,15 @@ struct StateIcon: View {
     }
 }
 
-/// Amber clock chip marking a reading that is older than the stale interval.
-struct StaleBadge: View {
+/// Tiny neutral clock beside a provider's name when its reading is older than the stale interval.
+struct StaleMark: View {
+    let tile: ProviderTile
     let size: CGFloat
 
     var body: some View {
-        Circle().fill(Color(hex: 0x1C1C1F)).overlay(Circle().stroke(OrbitTheme.stale.opacity(0.55), lineWidth: 1))
-            .overlay(StateIcon(kind: .clock, size: size * 0.6, color: OrbitTheme.stale))
-            .frame(width: size, height: size)
+        if tile.isStale && tile.availability == .measured {
+            StateIcon(kind: .clock, size: size, color: OrbitTheme.muted)
+        }
     }
 }
 

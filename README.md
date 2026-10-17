@@ -7,7 +7,7 @@ A local macOS desktop WidgetKit widget for Claude, Codex, and Antigravity (`agy`
 - **Large:** the same four providers in a 2x2 grid.
 - **Orbit Ledger (separate large widget):** one row per provider with the 5h and 7d bars side by side.
 
-Provider marks (Claude, Codex, Gemini, Antigravity) are vector shapes drawn in `Widget/ProviderMarks.swift`; the Antigravity mark follows the official full-color icon. Stale data shows a small clock badge on the affected provider (the widgets print no "Updated" text); a missing snapshot shows dashed rings with a crossed-out cloud and **No data**; a Claude authorization problem shows a lock and **Authorization needed**. The widget does not show run-out forecasts.
+Provider marks (Claude, Codex, Gemini, Antigravity) are vector shapes drawn in `Widget/ProviderMarks.swift`; the Antigravity mark follows the official full-color icon. Stale data is slightly dimmed with a tiny grey clock beside the provider name (the widgets print no "Updated" or "STALE" text); a missing snapshot shows dashed rings with a crossed-out cloud and **No data**; a Claude authorization problem shows a lock and **Authorization needed**. The widget does not show run-out forecasts.
 
 Requires macOS 15+, Xcode 16+ (tested with Xcode 26.3), and an existing `/usr/local/bin/quota-axi` installation. No package downloads, XcodeGen, Apple ID, or paid developer account are required. The project uses local ad-hoc signing; leave Signing Certificate set to **Sign to Run Locally** and do not select a development team.
 
@@ -39,13 +39,13 @@ open DerivedData/Build/Products/Debug/AIQuotaWidget.app
 
 If the gallery has not discovered the app, run it once from Xcode, close and reopen the gallery, and search again. For a stable installed location, copy the built app to your user Applications folder and launch that copy. Replacing a build can require removing and re-adding the widget.
 
-A closed host window does not quit the process; reopen the app to show its window. Quitting the app or sleeping the Mac pauses reads. WidgetKit schedules display updates and can delay them; it is not a continuous background polling service. After 30 minutes without fresh data, the widget marks every provider with the clock badge. Missing or unreadable snapshots show all providers with **No data** and an instruction to open the app. Provider-side stale data is also marked stale. An omitted provider, unknown scope, failed authorization, or unmeasurable limit is never represented as 0% or 100%.
+A closed host window does not quit the process; reopen the app to show its window. Quitting the app or sleeping the Mac pauses reads. WidgetKit schedules display updates and can delay them; it is not a continuous background polling service. After 30 minutes without fresh data, the widget slightly dims every provider and adds a tiny grey clock beside its name. Orange and red are reserved for low quota. Missing or unreadable snapshots show all providers with **No data** and an instruction to open the app. Provider-side stale data is also marked stale. An omitted provider, unknown scope, failed authorization, or unmeasurable limit is never represented as 0% or 100%.
 
 Claude reads always include `--allow-keychain-prompt`. If Claude reports **authorization needed**, follow the host app's hint: run `/usr/local/bin/quota-axi --provider claude --allow-keychain-prompt` in Terminal, re-authorize if needed, approve Keychain access with **Always Allow**, and refresh. A whole-command or decoding failure retains the last successful snapshot and its original timestamp, and displays an error in the host app.
 
 ## Additional local checks
 
-After building, `Scripts/preview.sh` renders the small (all four provider frames), medium, large, and ledger layouts with the captured reading, stale data, missing data, and Claude authorization required to `DerivedData/Previews/`.
+After building, `Scripts/preview.sh` renders the small (all four provider frames), medium, large, and ledger layouts with the captured reading, low quota, stale data, missing data, and Claude authorization required to `DerivedData/Previews/`.
 
 After launching the host and waiting for its first successful refresh, `Scripts/verify-sandbox.sh` builds an ad-hoc signed sandbox probe with the extension's exact entitlements. It checks that the shared snapshot contains all three providers, can be read, and cannot be opened for writing. This does not place a widget on the desktop; add the widget from the gallery to complete the interactive check.
 

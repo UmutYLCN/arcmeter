@@ -19,8 +19,8 @@ enum OrbitTheme {
     static let gauge = Color.white
     static let warning = Color(hex: 0xFF9F0A)
     static let critical = Color(hex: 0xFF453A)
-    /// Authorization and stale cues share the warning orange.
-    static let stale = warning
+    /// Orange and red mean low quota only; stale and authorization cues stay neutral.
+    static let dimmed = 0.75
 
     /// White while healthy; orange below 20% remaining, red below 10%.
     static func fill(_ percent: Double?) -> Color {
