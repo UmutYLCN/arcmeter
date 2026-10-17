@@ -147,6 +147,18 @@ public enum ResetCountdown {
     }
 }
 
+public enum TimelineDates {
+    /// WidgetKit only redraws a widget at its entry dates, so the countdown gets one entry per minute for the next hour.
+    public static let horizon: TimeInterval = 3600
+
+    /// `now`, one entry per minute up to the horizon, and any stale transitions still ahead; sorted and unique.
+    public static func entries(now: Date, staleTransitions: [Date]) -> [Date] {
+        let minutes = stride(from: 60.0, through: horizon, by: 60).map { now.addingTimeInterval($0) }
+        let future = staleTransitions.filter { $0 > now }
+        return Array(Set([now] + minutes + future)).sorted()
+    }
+}
+
 public enum ElapsedText {
     /// "2 min", "3 hr" or "1 d" since `date`.
     public static func text(since date: Date, now: Date) -> String {

@@ -5,6 +5,7 @@ import WidgetKit
 /// 5h ring with the remaining percentage inside; the fill is the share of quota left.
 struct OrbitRing: View {
     let tile: ProviderTile
+    let now: Date
     let size: CGFloat
     let numberSize: CGFloat
 
@@ -28,7 +29,7 @@ struct OrbitRing: View {
                     Text(PercentText.text(tile.fiveHour)).font(.system(size: numberSize, weight: .medium)).monospacedDigit()
                     if tile.fiveHour != nil { Text("%").font(.system(size: numberSize * 0.4)) }
                 }
-                FiveHourCaption(tile: tile, size: max(numberSize * 0.36, 7))
+                FiveHourCaption(tile: tile, now: now, size: max(numberSize * 0.36, 7))
             }.foregroundStyle(OrbitTheme.text)
             }
         }
@@ -49,17 +50,16 @@ struct OrbitFooter: View {
     }
 }
 
-/// The 5h caption under the percentage: time left in that window ("2h 14m*"), redrawn every minute.
+/// The 5h caption under the percentage: time left in that window ("2h 14m*"), rendered at the entry's date.
 struct FiveHourCaption: View {
     let tile: ProviderTile
+    let now: Date
     let size: CGFloat
 
     var body: some View {
-        TimelineView(.everyMinute) { context in
-            let left = ResetCountdown.remaining(until: tile.fiveHourReset, now: context.date) ?? "—"
-            Text(left + (tile.fiveHourIsLow ? "*" : ""))
-        }
-        .font(.system(size: size)).foregroundStyle(OrbitTheme.muted)
+        let left = ResetCountdown.remaining(until: tile.fiveHourReset, now: now) ?? "—"
+        Text(left + (tile.fiveHourIsLow ? "*" : ""))
+            .font(.system(size: size)).foregroundStyle(OrbitTheme.muted)
     }
 }
 
@@ -77,6 +77,7 @@ struct HalfArc: Shape {
 /// Everything is laid out on one centre line and the whole gauge shrinks to the width it is given.
 struct OrbitHalfGauge: View {
     let tile: ProviderTile
+    let now: Date
     private static let design = CGSize(width: 124, height: 70)
     private let radius: CGFloat = 48.7
     private let line: CGFloat = 9.3
@@ -115,7 +116,7 @@ struct OrbitHalfGauge: View {
                     Text(PercentText.text(tile.fiveHour)).font(.system(size: 30, weight: .medium)).monospacedDigit()
                     if tile.fiveHour != nil { Text("%").font(.system(size: 11)) }
                 }
-                FiveHourCaption(tile: tile, size: 9)
+                FiveHourCaption(tile: tile, now: now, size: 9)
             }
             .foregroundStyle(OrbitTheme.text)
             .padding(.bottom, -7)
@@ -208,7 +209,7 @@ struct OrbitSmallView: View {
                 }
             }.frame(height: 20).offset(y: -5)
             Spacer(minLength: 0)
-            OrbitHalfGauge(tile: tile)
+            OrbitHalfGauge(tile: tile, now: entry.date)
             Spacer(minLength: 0)
             if tile.availability == .measured {
                 OrbitWeeklyBar(tile: tile, entry: entry, metrics: .init(text: 10, spacing: 5, barHeight: 5, segmentGap: 2))
@@ -300,7 +301,7 @@ struct OrbitRowView: View {
                                 StaleMark(tile: tile, size: layout.name - 1)
                             }.padding(.bottom, 5)
                             Spacer(minLength: layout.gap)
-                            OrbitRing(tile: tile, size: layout.ring, numberSize: layout.number)
+                            OrbitRing(tile: tile, now: entry.date, size: layout.ring, numberSize: layout.number)
                             Spacer(minLength: layout.gap)
                             OrbitWeeklyBar(tile: tile, entry: entry, metrics: layout.weekly)
                                 .frame(width: layout.barWidth)
@@ -339,7 +340,7 @@ struct OrbitLargeView: View {
                                         Text(tile.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
                                         StaleMark(tile: tile, size: 10)
                                     }.padding(.bottom, 5)
-                                    OrbitRing(tile: tile, size: 96, numberSize: 30)
+                                    OrbitRing(tile: tile, now: entry.date, size: 96, numberSize: 30)
                                     OrbitWeeklyBar(tile: tile, entry: entry,
                                                    metrics: .init(text: 12, spacing: 4, barHeight: 6, segmentGap: 2))
                                         .frame(width: 136)

@@ -115,6 +115,21 @@ final class DisplayTests: XCTestCase {
         XCTAssertNil(text(nil))
     }
 
+    func testTimelineEntriesTickEveryMinuteAndMergeStaleTransitions() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        let stale = [-10.0, 90, 120, 7200].map { now.addingTimeInterval($0) }
+        let dates = TimelineDates.entries(now: now, staleTransitions: stale)
+        XCTAssertEqual(dates.first, now)
+        XCTAssertEqual(dates, dates.sorted())
+        XCTAssertEqual(Set(dates).count, dates.count)
+        XCTAssertFalse(dates.contains(stale[0]), "transitions already past are dropped")
+        XCTAssertTrue(dates.contains(now.addingTimeInterval(60)))
+        XCTAssertTrue(dates.contains(now.addingTimeInterval(3600)))
+        XCTAssertTrue(dates.contains(stale[1]))
+        XCTAssertTrue(dates.contains(stale[3]), "a transition past the hour still gets its entry")
+        XCTAssertEqual(dates.count, 1 + 60 + 2, "the 120 s transition coincides with a minute tick and adds nothing")
+    }
+
     func testFiveHourCountdownShowsNilWhenUnknownOrPassed() {
         let now = Date(timeIntervalSince1970: 1_000_000)
         func text(_ seconds: Double?) -> String? { ResetCountdown.remaining(until: seconds.map { now.addingTimeInterval($0) }, now: now) }

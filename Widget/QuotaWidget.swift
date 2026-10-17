@@ -20,14 +20,14 @@ struct QuotaTimeline: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotaEntry>) -> Void) {
         let now = Date()
         let snapshot = SnapshotStore.read()
-        // A future entry turns stale on time even if WidgetKit delays a reload.
-        var dates = [now]
+        // A future entry turns stale on time even if WidgetKit delays a reload, and a per-minute entry keeps the countdown live.
+        var transitions: [Date] = []
         if let snapshot {
-            let transitions = [snapshot.generatedAt] + snapshot.rows.map(\.observedAt)
-            dates += transitions.map { $0.addingTimeInterval(Snapshot.staleInterval) }.filter { $0 > now }
+            transitions = ([snapshot.generatedAt] + snapshot.rows.map(\.observedAt)).map { $0.addingTimeInterval(Snapshot.staleInterval) }
         }
         let index = providerIndex(snapshot)
-        let entries = Array(Set(dates)).sorted().map { QuotaEntry(date: $0, snapshot: snapshot, providerIndex: index) }
+        let entries = TimelineDates.entries(now: now, staleTransitions: transitions)
+            .map { QuotaEntry(date: $0, snapshot: snapshot, providerIndex: index) }
         completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(300))))
     }
 
